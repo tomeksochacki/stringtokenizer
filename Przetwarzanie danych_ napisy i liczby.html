@@ -1,0 +1,1801 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<!-- saved from url=(0062)https://edu.pjwstk.edu.pl/wyklady/ppj/scb/NapLicz/NapLicz.html -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=windows-1250">
+  
+  <meta name="author" content="Krzysztof Barteczko">
+  <meta name="description" content="Podstawy programowania w języku Java (PRG1, PPJ)">
+  <meta name="copyright" content="(c) Krzysztof Barteczko PJWSTK 2008">
+  <link rel="stylesheet" type="text/css" href="./Przetwarzanie danych_ napisy i liczby_files/common.css">   
+  <title>Przetwarzanie danych: napisy i liczby</title>
+</head>
+<body>
+<div align="Center">
+<a name="NapLicz"></a><h1>Przetwarzanie danych: napisy i liczby</h1>
+<hr>
+</div>
+
+<a name="NapLicz.1"></a><h2>1.  Napisy modyfikowalne</h2>
+
+Pewną zaskakującą może właściwością <a name="ind.NapLicz.1"></a>klasy String jest to, że jej
+obiekty są <b>niemodyfikowalne</b> - to znaczy utworzonych
+za pomocą klasy String napisów nie możemy zmieniać (np. do napisu dodać
+inny). <br>
+Jak to ? Przecież wielokrotnie zajmowaliśmy się konkatenacją łańcuchów.<br>
+No tak, ale wynikowy napis, powstający z dodania do łańcucha znakowego
+innego napisu, <b>jest nowym obiektem</b> i np. w takiej
+sekwencji:<br>
+<br>String s = "Ala";<br>
+s = s + " ma kota";<br>
+<br>tworzony jest nowy obiekt, zawierający napis "Ala ma kota" i
+referencja do
+niego przypisywana jest zmiennej s, która poprzednio zawierała
+referencję do napisu "Ala".<br>
+<br>Zwróćmy też uwagę, że w klasie String nie ma żadnych metod
+pozwalających modyfikować istniejący obiekt-napis.<br><br>Niemodyfikowalność
+klas jest zaletą: zwiększa niezawodność programowania.<br>
+Czasami jednak zmiany obiektów napisów są potrzebne. <br>
+<br><div class="important"><a name="ind.NapLicz.2"></a>Modyfikowalne
+obiekty-łańcuchy znakowe definiują klasy <b>StringBuffer</b>
+i&nbsp;StringBuilder.</div><br>
+<br><a name="ind.NapLicz.3"></a>Obiekty klas StringBuffer (i StringBuilder) to "bufory",
+które dynamicznie możemy wypełniać
+napisami. W szczególności możemy utworzyć pusty - na razie - bufor:<br>
+<br>StringBuffer sb = new StringBuffer();<br>
+<br>po czym wypelniać go zawartością dopisując do niego jakieś
+kolejne napisy, znaki lub liczby (znakowe reprezentacje liczb), lun
+napisowe reprezentacje obiektów:<br>
+<br>sb.append("jakiś napis 1");<br>
+sb.append("jakiś napis 2");<br>sb.append(10);<br>sb.append('\n');<br>sb.append
+(new Para(1,2));<br>
+...<br>
+<br>Metoda append zwraca StringBuffer wobec tego możemy
+&nbsp;to samo zapisać jako:<br><br>
+sb.append("jakiś napis 1").append("jakiś napis
+2").sb.append(10).sb.append('\n').append(new Para(1,2));<br><br>Inne
+metody klasy StringBuffer pozwalają m.in.&nbsp; na pobieranie i
+usuwanie fragmentów napisu, wstawianie napisów, wyszukiwanie itp. <br><br>Obiekt
+klasy StringBuffer łatwo można przekształcić w obiekt klasy String za
+pomocą metod toString():<br>
+<br>String s = sb.toString();<br>
+<br><a name="ind.NapLicz.4"></a>Klasa StringBuilder ma takie same metody jak StringBuffer.<br>
+<br>Wykorzystanie klasy StringBuffer lub StringBuilder zamiast
+String
+jest wskazane przy dużej liczbie "kumulatywnych" operacji konkatenacji,
+bo dzięki temu uzyskujemy wielokrotnie wyższą efektywność działania
+programu (<span style="font-weight: bold;">przy naprawdę
+dużej -
+powiedzmy ponad 10 tys.-&nbsp; operacji np. w pętli, użycie klasy
+String i operatora + jest wręcz niedopuszczalne</span>).<br><br>Uwaga:
+różnica między StringBufferem i StringBuilderem polega tylko na tym, że
+ten pierwszy zapewnia synchronizację dostępu z równolegle wykonujących
+się fragmentów kodu, a wobec tego jest nieco mniej efektywny; jednak ta
+właściwość jest niezbędna w programowaniu współbieżnym. <br><br>
+Różnicę pomiędzy użyciem String i StringBuffera pokazuje poniższy
+program.<br>
+Do mierzenia czasu operacji korzystamy w nim z klasy QTimer, w której
+zdefiniowaliśmy
+metodę getElapsed() zwracającą upływ czasu od momentu utworzenia
+obiektu tej
+klasy. Czas mierzymy za pomocą statycznej metody klasy System
+currentTimeMillis(),
+która zwraca bieżący czas w milisekundach.<pre>import javax.swing.*;
+
+class QTimer {
+
+   private final long start;
+
+   public QTimer() {
+     System.gc();
+     start = System.currentTimeMillis();
+   }
+
+   public long getElapsed() {
+      return System.currentTimeMillis() - start;
+   }
+}
+
+public class Test {
+
+
+  public static void main(String args[]) throws InterruptedException {
+
+    int n = Integer.parseInt(JOptionPane.showInputDialog("Liczba operacji"));
+
+    // String
+    QTimer t = new QTimer();
+    String strA = "";
+    for (int i = 1; i &lt;= n; i++)  strA += "A";
+    long etA = t.getElapsed();
+    System.out.println("String operator +;   Czas: " + etA  + " ms");
+
+    // StringBuffer
+    t = new QTimer();
+    StringBuffer sb = new StringBuffer();
+    for (int i = 1; i &lt;= n; i++) sb.append("B");
+    sb.toString();  
+    long etB = t.getElapsed();
+    System.out.println("StringBuffer append. Czas: " +  etB + " ms");  
+ 
+    System.out.println("Wykonano " + n + " operacji.");
+    System.out.println("Relacja String/StringBuffer  = " + (double) etA/etB); 
+  }
+}
+
+
+</pre>
+Możliwy wynik:<br><div class="listing100">String
+operator +;&nbsp;&nbsp; Czas: 58875 ms<br>StringBuffer
+append. Czas: 15 ms<br>Wykonano 90000 operacji.<br>Relacja
+String/StringBuffer&nbsp; =&nbsp;3925.0</div><br><hr style="width: 100%; height: 2px;">
+<a name="NapLicz.2"></a><h2>2.  Pliki tekstowe</h2>
+Potrafimy
+już odczytać informację z pliku tekstowego (zob. punkty nt. czytania
+informacji z pliku za pomocą skanera w poprzednim materiale). A jak ją
+zapisać do pliku? I czy skaner to jedyny możliwy sposób?<br><br>Bardziej
+ogólnym i uniwersalnym sposobem jest zastosowanie tzw. klas
+strumieniowych z pakietu java.io.<br>O koncepcji tej i jej
+szczegółach będzie mowa w przyszłym semestrze. Teraz zajmiemy się
+wycinkiem tej problematyki,
+skrótowo i niejako czysto "instruktażowo".<br><br>
+Ogólnie, pliki <b>jako ciągi bajtów </b>(powiemy: pliki
+bajtowe) są w Javie reprezentowane przez obiekty
+klas strumieniowych FileInputStream (pliki wejściowe - z których
+wczytujemy dane) i FileOutputStream
+(pliki wyjściowe - do których zapisujemy dane).<br>
+<br><a name="ind.NapLicz.5"></a>Przygotowanie pliku do przetwarzania przez program nazywa się
+<b>otwarciem</b> pliku.<br> W Javie pliki są
+otwierane automatycznie przy tworzeniu plikowych obiektów
+strumieniowych
+(czyli obiektów oznaczających pliki, w tym obiektów wspomnianych wyżej
+klas&nbsp;FileInputStream
+i&nbsp;FileOutputStream).<br><a name="ind.NapLicz.6"></a>
+Obiekty-pliki <b>bajtowe</b> możemy tworzyć za pomocą
+konstruktorów klas
+FileInputStream i
+FileOutputStream, podając jako argument nazwę pliku.<br>
+<br>Np. <br><pre>FileInputStream in = new FileInputStream("Program1.java"); &nbsp; &nbsp; &nbsp; // gdy nie podano ściezki,
+FileOutputStream out = new FileOutputStream("Program2.java"); // pliki&nbsp;w katalogu roboczym aplikacji
+lub
+
+FileInputStream in = new FileInputStream("C:/Test/Program1.java"); &nbsp; // z podaną ściezką
+FileOutputStream out = new FileOutputStream("C:\\Test\\Program2.java"); // uwaga na symbol "escape"! </pre><br>
+Z plików bajtowych możemy czytać bajty za pomocą metody <b>int
+read() </b>i możemy do nich zapisywać bajty za pomocą metody <b>write(int)</b>.<br>
+Zwróćmy uwagę - bajty doskonale mieszczą się w zmiennej typu byte, ale
+read()
+zwraca wartość typu int, gdyż&nbsp; przy próbie czytania bajtów
+spoza końca pliku&nbsp;
+musi jakoś poinformować o końcu pliku. Umownie zwraca wtedy wartość -1
+(typu
+int), co oczywiście jest zupełnie inną wartością niż wszelkie możliwe
+wartości
+bajtów. <br>
+<br><a name="ind.NapLicz.7"></a>Po wykonaniu operacji na pliku powinniśmy plik <b>zamknąć</b>,
+co np. powoduje
+ostateczny, fizyczny zapis informacji, być może do tego momentu będącej
+jeszcze
+w buforach systemowych oraz inne działania porządkowe na poziomie
+systemu
+operacyjnego (niekiedy np. związane z możliwością udostępnienia pliku
+innym
+programom, lub z umożliwieniem otwarcia przez nasz program innych
+plików).
+<br><br>
+Do zamykania plików służy metoda <b>close()</b>.<br>
+<br>Możemy teraz napisać program, który - bajt po bajcie -
+kopiuje dowolny plik
+wejściowy do dowolnego pliku wyjściowego. Nazwy plików podajemy jako
+argumenty
+wywołania programu.<br>
+<br><pre>import java.io.*;
+import static javax.swing.JOptionPane.*;
+
+public class CopyFile {
+
+  public static void main(String[] args) {
+
+    FileInputStream in = null;   // plik wejściowy
+    FileOutputStream out = null; // plik wyjściowy
+
+    try {
+      in = new FileInputStream("in1");
+      out = new FileOutputStream("out1");
+      int c;
+      while ((c = in.read()) != -1)  out.write(c);    // kopiowanie
+    } catch (ArrayIndexOutOfBoundsException exc) {    // brak argumentu
+        System.out.println("Syntax: CopyFile in out");
+        System.exit(1);
+    } catch (FileNotFoundException exc) {             // nieznany plik
+        System.out.println("Plik wejściowy nie istnieje.");
+        System.exit(2);
+    } catch (IOException exc) {                       // inny błąd wejścia- wyjścia
+        System.out.println(exc.toString());
+        System.exit(3);
+    } finally {                     // zawsze zamykamy pliki
+        try {                       // niestety close może zgłosić wyjatek kontrolowany - trzeba użyć try
+          if (in != null) in.close();
+          if (out != null) out.close();
+      } catch (IOException exc) {
+          System.out.println(exc.toString());
+      }
+    }
+  }
+
+}
+</pre>
+<br><a name="ind.NapLicz.8"></a>Każdy plik jest sekwencją bajtów. Ale znaczenie bajtów może
+być bardzo różne.
+Mogą to być np. binarne reprezentacje jakichś liczb, albo mogą to być
+znaki
+(wtedy będziemy mówić o plikach tekstowych).<br>
+<br>Zwróćmy jednak uwagę, że w Javie znaki są przedstawiane w
+Unicodzie (czyli
+jako wartości dwubajtowe). Jeżeli tekst w pliku zapisany jest w ten
+właśnie sposób
+- to nie ma problemu. Ale często pliki tekstowe zapisywane są w różnych
+systemach
+kodowania, niekoniecznie w Unicodzie. Sposób kodowania znaków tekstu
+nazywa
+się stroną kodową. Np. wiele polskich dokumentów HTML zapisanych jest z
+wykorzystaniem
+strony&nbsp; kodowej ISO8859-2, inne - z wykorzystaniem strony
+Cp1250 (inaczej
+zwanej Windows 1250). To oczywiście nie jest Unicode - znaki zajmują 1
+bajt.<br><br><a name="ind.NapLicz.9"></a>
+W każdym systemie operacyjnym &nbsp;możemy też ustawić tzw.
+domyślną stronę kodową,
+która będzie wykorzystywana np. przy wczytywaniu i zapisie plików przez
+systemowe
+edytory tekstu. Np. w systemie Windows taką domyślną stroną kodową
+najczęściej jest - w polskich warunkach - Cp1250.<br>
+Przy wczytywaniu Java musi dokonać przekodowania plików zapisanych w
+domyślnej
+stronie kodowej na Unicode, a przy zapisie wykonać operację odwrotną -
+przekodowania
+z Unicodu do domyślnej strony kodowej.<br>Metody klas
+FileInputStream i FileOutputStream
+- nie wykonują tego zadania (czytają i piszą bajt po bajcie, co w
+przypadku
+plików tekstowych może powodować utratę informacji.<br>
+Zobaczmy przykład.<br>
+Poniższy program.<br>
+<pre>import java.io.*;
+
+public class ReadBytesAsChars {
+
+ public static void main(String[] args) {
+   StringBuffer cont = new StringBuffer();
+
+   try {
+     FileInputStream in = new FileInputStream(args[0]);
+     int c;
+     while ((c = in.read()) != -1) cont.append((char) c);
+     in.close();
+   } catch(Exception exc) {
+       System.out.println(exc.toString());
+       System.exit(1);
+   }
+   String s = cont.toString();
+   System.out.println(s);
+ }
+
+}
+</pre>czyta
+plik tekstowy i zapisuje jego zawartość w łańcuchu znakowym (String),
+po czym wypisuje na konsoli &nbsp;ten łańcuch znakowy. Jeśli
+przeczytaliśmy z
+pliku zapisanego w Cp1250 następujący tekst:<br>
+<br>Początek <br>
+pogłębienia <br>
+znajomości <br>
+Javy<br>
+<br>to na konsoli uzyskamy:<br>
+<br>Pocz?tek<br>
+pog??bienia<br>
+znajomo?ci<br>
+Javy<br>
+<a name="ind.NapLicz.10"></a><br>Takich strat informacji nie będzie, jeśli do czytania plików
+wykorzystamy
+obiekt klasy <b>FileReader</b>, a do zapisywania - <b>FileWriter</b>,
+bowiem klasy te zapewniają
+konwersje między domyślną stroną kodową systemu operacyjnego
+i&nbsp; Unicodem<br>
+<br><div class="important">Do przetwarzania plików
+tekstowych należy wykorzystywać klasy FileReader i FileWriter</div><br>
+&nbsp;<br>
+Poprzedni przykład możemy teraz zapisać tak:<br>
+<pre>import java.io.*;
+
+public class ReadByReader {
+
+ public static void main(String[] args) {
+   StringBuffer cont = new StringBuffer();
+
+   try {
+     FileReader in = new FileReader(args[0]);
+     int c;
+     while ((c = in.read()) != -1) cont.append((char) c);
+     in.close();
+   } catch(Exception exc) {
+     System.out.println(exc.toString());
+     System.exit(1);
+   }
+   String s = cont.toString();
+   System.out.println(s);
+ }
+
+}
+</pre><br>
+Przy przetwarzaniu plików zetkniemy się także z kwestią efektywności.<br>
+Np. przy czytaniu dużych plików tekstowych należy unikać bezpośredniego
+czytania za pomocą klasy FileReader, bowiem każde odczytanie znaku może
+powodować
+fizyczne odwołanie do pliku (to samo dotyczy zapisu i klasy
+FileWriter).
+<br>Operacje fizycznych odwołań do pliku (dysku) są czasochłonne.<br><a name="ind.NapLicz.11"></a>
+Aby je ograniczyć - stosujemy tzw. buforowanie.<br> W pamięci
+operacyjnej
+wydzielany jest duży obszar pamięci, który zapełniany jest przez
+jednorazowe
+fizyczne odwołanie do pliku. Instrukcje czytania pliku pobierają
+informacje
+z tego bufora. Gdy bufor jest pusty - następuje kolejne jego
+wypełnienie poprzez
+fizyczne odwołanie do pliku. W ten sposób liczba fizycznych odwołań do
+pliku
+(do dysku) jest mniejsza niż liczba zapisanych w programie instrukcji
+czytania
+danych.<br>
+<br>W Javie do buforowania wejściowych plików tekstowych
+stosujemy <a name="ind.NapLicz.12"></a>klasę BufferedReader. <br>
+Ale klasa ta nie pozwala - przy tworzeniu obiektów - bezpośrednio, w
+konstruktorze ,
+podawać źródła danych (np. nazwy pliku).
+<br>Źródło to podajemy przy tworzeniu obiektu typu FileReader, a
+po to,
+żeby uzyskać buforowanie, "opakowujemy" FileReader -&nbsp;
+BufferedReaderem.
+<br><br>Wygląda to tak:<br><pre>// tu powstaje związek z fizycznym źródłem
+FileReader fr = new FileReader("plik.txt"); 
+
+// tu dodajemy "opakowanie", umożliwiające buforowanie 
+BufferedReader br = new BufferedReader(fr);
+
+//... teraz wszelkie odwołania czytania itp. kierujemy do obiektu br
+</pre><a name="ind.NapLicz.13"></a>Dodatkowo
+w klasie BufferedReader zdefiniowano wygodną metodę czytania wierszy
+pliku: <br><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+readLine()<br><br>która zwraca kolejny wiersz jako String
+lub null jeśli wystąpił koniec pliku<br><br>Zarys czytania:<br><pre> try {
+   String line;
+   FileReader fr = new FileReader(fname); // fname jest nazwą pliku
+   BufferedReader br = new BufferedReader(fr);
+
+   while ((line = br.readLine()) != null) { // kolejny wiersz pliku: metoda readLine
+      ...
+      // tu robimy coś z wierszami pliku
+   }
+   br.close(); // zamknięcie pliku
+ } catch (IOException e) {
+     e.printStackTrace();
+ } </pre>i
+jego realizacja na przykładzie poprzedniego programu:<br><pre>import java.io.*;
+
+public class BuffRead {
+
+  public static void main(String[] args) {
+    
+    try {
+      BufferedReader in = new BufferedReader(
+                              new FileReader("in1"));
+      StringBuffer sb = new StringBuffer();
+      String line;
+      while ((line = in.readLine()) != null) {
+        sb.append(line).append('\n');
+      }
+      in.close();
+      System.out.println(sb);
+    } catch (IOException exc) {
+      exc.printStackTrace();
+    }
+
+  }
+
+}</pre><a name="ind.NapLicz.14"></a>Naturalnie,
+do czytania plików tekstowych zapisanych w domyślnej stronie kodowej
+nieco wygodniejszy jest Scanner.<br>Przypomnijmy schemat:<br><pre>import java.io.*;
+import java.util.*;
+
+public class ScanRead {
+
+  public static void main(String[] args) {
+    StringBuffer sb = new StringBuffer();
+    try {
+      Scanner scan = new Scanner(new File("in1"));
+      while (scan.hasNextLine()) {
+        sb.append(scan.nextLine()).append('\n');
+      }
+      scan.close();
+      System.out.println(sb);
+    } catch (FileNotFoundException exc) {
+      exc.printStackTrace();
+    }
+
+  }
+
+}</pre><a name="ind.NapLicz.15"></a>Ale
+do zapisywania plików musimy używać klas strumieniowych.<br>Buforowany
+zapis plików tekstowych uzyskać można przez&nbsp;opakowanie obiektu
+klasy FileWriter w obiekt klasy&nbsp;BufferedWriter. Do zapisu tekstu
+używamy metody write(String). Dodatkowo klasa BuffredWriter posiada
+wygodną metodę newLine(), która dopisuje właściwy&nbsp;dla danej
+platformy systemowej&nbsp;znak końca wiersza (0d0aX w Windows, 0aX
+-
+Unix).<br><br>Przykład: kopiowanie plików tekstowych z
+buforowaniem odczytu i zapisu.<br><pre>public class BuffTextFileCopy {
+
+  public static void main(String[] args) {
+    BufferedReader in = null;
+    BufferedWriter out = null;
+    
+    try {
+      in = new BufferedReader(new FileReader("in1"));
+      out = new BufferedWriter(new FileWriter("out1"));
+      String line;
+      while ((line = in.readLine()) != null) {
+        out.write(line);
+        out.newLine();
+      }
+    } catch (IOException exc) {
+      exc.printStackTrace();
+    } finally {
+      try {
+        if (in != null) in.close();
+        if (out != null) out.close();
+      } catch(IOException exc) {
+        exc.printStackTrace();
+      }
+    }
+
+  }
+
+}</pre><a name="ind.NapLicz.16"></a>Przy
+zapisie buforowanych plików ważne jest, aby po zakończeniu zapisu
+zawsze je zamykać. W przeciwnym razie część (lub całość) informacji
+może pozostać w buforze i nie trafić do pliku. Dlatego zamknięcie
+plików umieściliśmy w klauzuli finally, która wykona się zawsze
+&nbsp;bez względu na to czy powstaną jakieś wyjątki czy nie.<br><br><a name="ind.NapLicz.17"></a>Na
+zakończenie tego krótkiego wprowadzenia do przetwarzania plików
+tekstowych warto zwrócić uwagę na następujące kwestie:<br><ul><li>klasa
+File nie zawiera żadnych metod odczytu lub zapisu plików, służy ona
+abstrakcyjnemu oznaczaniu obiektów plikowych i dostarcza metod uzyskiwania o nich
+informacji,</li><li>referencje do obiektów klasy File
+możemy jednak podawać w konstruktorach klas FileReader, FileWriter
+i&nbsp; Scanner, uzyskując w ten sposób dostęp do operacji czytania
+plików lub ich zapisu,</li><li>skanerowi - jako źródło
+danych - możemy podawać oprócz File również FileReader lub
+BufferedReader.</li><li><a name="ind.NapLicz.18"></a>przy
+wykorzystaniu klas&nbsp;strumieniowych możemy dokonywać dekodowania
+(zamiana na Unicode przy wczytywaniu) i kodowania (zamiana na kodowanie
+dla danej strony kodowej przy zapisie) &nbsp;tekstów dla dowolnych
+stron kodowych - służą temu klasy InputStreamReader i
+OutputStreamWriter; przy zastosowaniu skanera sytuacja jest nieco
+prostsza: można podać w konstruktorze stronę kodowa wczytywanego pliku
+i będzie dokonana translacja jego treści do Unicodu np.</li></ul><pre>File file = new File("tekst.txt");
+
+// załóżmy, że plik jest zapisany w stronie kodowej ISO8859-2
+// normalnie skaner dokonuje dekodowania do domyślnej strony kodowej na danej platformie
+// jeśli nie jest to ISO8859-2, to plik nie zostanie właściwie odczytany
+// możemy jednak podać z jakiej strony kodowej ma być dekodowanie
+
+Scanner scan = new Scanner(file, "ISO8859-2");
+
+// i teraz zawartość pliku będzie włąsciwie przekształcona do Unicodu
+&nbsp;&nbsp;&nbsp;</pre><br><hr style="width: 100%; height: 2px;">
+
+<a name="NapLicz.3"></a><h2>3.  Metody klasy String</h2>
+W praktycznych programach
+bardzo często będziemy operować na łańcuchach
+znakowych (napisach). Wiemy doskonale, że są one reprezentowane przez
+obiekty
+klasy String. W klasie tej znajdziemy wiele użytecznych metod
+przeznaczonych
+do operowania na łańcuchach znakowych.<br>
+<br>Dokumentację klas i ich metod standardowych pakietów Javy
+znajdziemy w podkatalogu
+docs katalogu instalacyjnego Javy. Jest ona w postaci HTML: klasy
+podzielone
+są według pakietów a także dostępna jest alfabetyczna lista wszystkich
+klas.<br>
+<br><a name="ind.NapLicz.19"></a>Dla wygody poniżej przedstawiono wybrane metody klasy String.<br>
+Zwróćmy uwagę, że:<br>
+<ul><li>kolejne znaki napisów występują na pozycjach, które
+są indeksowane
+poczynając od 0: np. napis "Ala" ma trzy znaki na pozycjach 1, 2, 3;
+pierwsza
+pozycja ma indeks 0, druga - 1, trzecia 2. Możemy też powiedzieć, że
+pierwszy
+znak ma indeks 0, a ostatni - indeks o 1 mniejszy od długości napisu,</li><li>części
+napisów (łańcuchów znakowych) określa się terminem "podłańcuch"
+(substring),</li><li>większość z omawianych dalej metod
+(wszystkie metody niestatyczne)
+używana jest "na rzecz" obiektów klasy String; o obiekcie na rzecz
+którego
+wywołano metodę mówimy <i><b>ten</b></i> napis,<br></li><li>przedstawiono
+tu nie wszystkie metody klasy String, a jedynie te najbardziej
+użyteczne.<br></li></ul>
+<br><br>
+<table style="width: 100%;" border="1" cellpadding="3" cellspacing="0"><tbody><tr><td colspan="2"><div align="center"><span style="font-weight: bold;">Wybrane
+metody klasy String</span><br></div></td></tr><tr><td style="width: 1%; vertical-align: top; text-align: right; white-space: nowrap;">
+char</td><td><span style="font-weight: bold;">charAt(int
+index)</span><br> Zwraca znak na pozycji, oznaczonej
+indeksem index. Pierwsza pozycja ma indeks 0.</td></tr><tr><td align="right" valign="top" width="1%"> int</td><td><span style="font-weight: bold;">compareTo(String anotherString)</span><br>
+Porównuje dwa napisy: ten (this) na rzecz którego użyto metody oraz
+przekazany jako argument.<br>
+Metoda zwraca 0, gdy napisy są takie same.<br>
+Jeżeli się różnią, to - gdy występują w nich różne znaki - zwracana
+jest wartość: <br> this.charAt(k) - anotherString.charAt(k), <br>
+gdzie k - indeks pierwszej pozycji, na której występuje różnica znaków.
+Jeżeli
+długość napisów jest różna (a znaki napisów są takie same w części
+określanej
+przez dlugośc krótszego napisu) - zwracana jest różnica dlugości:<br>
+this.length() - anotherString.length().<br><br>
+Oznacza to, że wynik jest ujemny, gdy ten (this) łańcuch poprzedza
+leksykograficznie (alfabetycznie) argument (anothetString) oraz dodatni
+- gdy ten łańcuch jest leksykograficznie większy od argumentu.<br></td></tr><tr><td align="right" valign="top" width="1%"> int</td><td><span style="font-weight: bold;">compareToIgnoreCase(String str)</span><br>
+Porównuje leksykograficznie dwa napisy, bez rozróżnienia małych i
+wielkich liter.</td></tr><tr><td align="right" valign="top" width="1%"> boolean</td><td><span style="font-weight: bold;">endsWith(String suffix)</span><br>
+Zwraca true, gdy napis kończy się łańcuchem znakowym podanym jako
+argument, false - w przeciwnym razie.</td></tr><tr><td align="right" valign="top" width="1%"> boolean</td><td style="width: 70%;"><span style="font-weight: bold;">equals(Object
+anObject)</span><br>
+Zwraca true gdy anObject jest takim samym co do zawartości napisem jak
+ten napis; w każdym innym przypadku - zwraca false.</td></tr><tr><td align="right" valign="top" width="1%"> boolean</td><td><span style="font-weight: bold;">equalsIgnoreCase(String
+anotherString)</span><br> J.w. - ale bez rozróżniania
+małych i wielkich liter.</td></tr><tr><td align="right" valign="top" width="1%"> int</td><td><span style="font-weight: bold;">indexOf(String str)</span><br>
+Zwraca indeks pozycji pierwszego wystąpienia w danym napisie napisu
+podanego jako argument str; jeżeli str nie występuje w tym napisie -
+zwraca
+-1</td></tr><tr><td align="right" valign="top" width="1%"> int</td><td><span style="font-weight: bold;">indexOf(String str, int fromIndex)</span><br>
+Poszukuje pierwszego wystąpienia
+napisu str poczynając od pozycji oznaczonej przez indeks fromIndex;
+zwraca
+indeks pozycji na której zaczyna się str lub - 1 gdy str nie występuje
+w tym napisie.<br>
+Jeśli fromIndex jest ujemne lub zero - przeszukiwany jest cały napis;
+jeśli
+fromIndex jest większe od długości napisu - zwracane jest -1.<br></td></tr><tr><td align="right" valign="top" width="1%"> int</td><td><span style="font-weight: bold;">lastIndexOf(String str)</span><br>
+Jak indexOf - ale zwracany jest indeks pozycji ostatniego wystąpienia.</td></tr><tr><td align="right" valign="top" width="1%"> int</td><td><span style="font-weight: bold;">lastIndexOf(String str, int
+fromIndex)</span><br> J.w.<br>
+Uwaga: metody indexOf i lastIndexOf mają również swoje wersje dla
+argumentów - znaków (typu char).<br></td></tr><tr><td align="right" valign="top" width="1%"> int</td><td><span style="font-weight: bold;">length()</span><br>
+Zwraca długość napisu.</td></tr><tr><td align="right" valign="top" width="1%"> String</td><td><span style="font-weight: bold;">replace(char oldChar, char
+newChar)</span><br> Zwraca nowy obiekt klasy String, w
+którym zastąpiono wszystkie wystąpienia znaku oldChar na znak newChar.</td></tr><tr><td style="vertical-align: top; text-align: right; white-space: nowrap;">String</td><td><span style="font-weight: bold;">replace(CharSequence&nbsp;target,
+CharSequence&nbsp;replacement)</span><br>Zwraca nowy
+obiekt&nbsp;klasy String, w którym zastąpiono wszystkie wystąpienia
+podnapisu target na napis replacement.</td></tr><tr><td style="text-align: right; vertical-align: top;">String</td><td><span style="font-weight: bold;">replaceAll(String regex, String
+replacement)</span><br>Zwraca
+nowy obiekt klasy String, w którym zastąpiono wszystkie wystąpienia
+podnapisów pasujących do wzorca podanego przez wyrażenie regularne
+regex na napis target.</td></tr><tr><td style="text-align: right; vertical-align: top;">String</td><td><span style="font-weight: bold;">split(String&nbsp;regex)</span><br>Rozkłada
+napis na jego podnapisy rozdzielone dowolnymi separatorami, pasującymi
+do wzorca regex.</td></tr><tr><td align="right" valign="top" width="1%"> boolean</td><td><span style="font-weight: bold;">startsWith(String prefix)</span><br>
+Zwraca true, gdy napis zaczyna się podanym jako argument łańcuchem
+znakowym; false - w przeciwnym razie.</td></tr><tr><td align="right" valign="top" width="1%"> boolean</td><td><span style="font-weight: bold;">startsWith(String prefix, int
+toffset)</span><br> Zwraca true, gdy podłańcuch
+tego łańcucha znakowego zaczynający się na pozycji o indeksie toffset
+zaczyna
+się napisem prefiks; zwraca false w przeciwnym razie, lub gdy toffset
+jest
+&lt; 0 albo większy od dlugości napisu.</td></tr><tr><td align="right" valign="top" width="1%"> String</td><td><span style="font-weight: bold;">substring(int beginIndex)</span><br>
+Zwraca podłańcuch tego łańcucha znakowego zaczynający się na pozycji o
+indeksie beginIndex (do końca łańcucha).</td></tr><tr><td align="right" valign="top" width="1%"> String</td><td><span style="font-weight: bold;">substring(int beginIndex, int
+endIndex)</span><br> Zwraca podłańcuch tego łańcucha jako
+nowy obiekt
+klasy String. Podłańcuch zaczynay się na pozycji o indeksie beginIndex,
+a kończy (uwaga!) - na pozycji o indeksie endIndex-1. Długość
+podlańcucha
+równa jest endIndex - beginIndex.</td></tr><tr><td align="right" valign="top" width="1%"> char[]</td><td><span style="font-weight: bold;">toCharArray()</span><br>
+Znaki łańcucha -&gt; do tablicy znaków (typ char[]).</td></tr><tr><td align="right" valign="top" width="1%"> String</td><td><span style="font-weight: bold;">toLowerCase()</span><br>
+Zamiana liter na małe.</td></tr><tr><td align="right" valign="top" width="1%"> String</td><td><span style="font-weight: bold;">toUpperCase()</span><br>
+Zamiana liter na duże.</td></tr><tr><td align="right" valign="top" width="1%"> String</td><td><span style="font-weight: bold;">trim()</span><br>
+Usuwa znaki spacji, tabulacji, końca wiersza itp. tzw. biale znaki
+z obu końców łańcucha znakowego. Zwraca wynik jako nowy łańcuch.</td></tr><tr><td align="right" valign="top" width="1%">static
+String</td><td><span style="font-weight: bold;">valueOf(boolean
+b)</span><br> Zwraca wartość boolowską (boolean) jako napis
+(String).</td></tr><tr><td align="right" valign="top" width="1%">static String</td><td><span style="font-weight: bold;">valueOf(char c)</span><br>
+Zwraca wartość typu char jako napis.</td></tr><tr><td align="right" valign="top" width="1%">static
+String</td><td><span style="font-weight: bold;">valueOf(char[]
+data)</span><br> Zwraca napis złożony ze znakow tablicy. </td></tr><tr><td align="right" valign="top" width="1%">static
+String</td><td><span style="font-weight: bold;">valueOf(double
+d)</span><br> Zwraca znakową treprezentację liczby typu
+double.</td></tr><tr><td align="right" valign="top" width="1%">static String</td><td><span style="font-weight: bold;">valueOf(float f)</span><br>
+Zwraca znakową treprezentację liczby typu float.</td></tr><tr><td align="right" valign="top" width="1%">static
+String</td><td><span style="font-weight: bold;">valueOf(int
+i)</span><br> Zwraca znakową treprezentację liczby typu int.</td></tr><tr><td align="right" valign="top" width="1%">static
+String</td><td><span style="font-weight: bold;">valueOf(long
+l)</span><br> Zwraca znakową reprezentację liczby typu long.</td></tr></tbody>
+</table><br>W
+pierwszym przykładowym programie wykorzystamy metodę charAt(),
+zwracającą znak znajdujący się w napisie na podanej pozycji oraz
+emetody length() i equals().<br><br><img style="width: 297px; height: 218px; float: right;" alt="r" src="./Przetwarzanie danych_ napisy i liczby_files/Wycieczki.jpg">Problem: napisać program, który
+prosi użytkownika o wybranie jednej z możliwych
+wycieczek oznaczanych dużymi literami A, B, C ..., po czym podaje cenę
+tej
+wycieczki. Miejsca docelowe wycieczek oraz ich ceny mają być zapisane w
+tablicach, np.:<br>
+<br> String[] dest = { "Bali", "Cypr", "Ibiza", "Kenia", "Kuba" };<br>
+double[] price = { 5000, 2500, 2800, 4500, 6000 };<br>
+<br>a program winien dawać użytkownikowi możliwość wyboru za
+pomocą pokazanego obok okna dialogowego.<br>
+<br>A zatem użytkownik wprowadza napis, składający się z jednej
+litery "A" lub "B" lub "C', ... itd.<br>
+Dalsze działanie programu zależy od tego jaką literę wprowadzil.<br>
+Jeśli res oznacza wprowadzony napis, to moglibyśmy np. napisać:<br>
+<br>if (res.equals("A")) System.out.println(dest[0] + " - cena: "
++ price[0]);<br>
+else if (res.equals("B")) System.out.println(dest[1] + " - cena: " +
+price[1]);<br> else if (res.equals("C")) ..<br> else if
+(res.equals("D")) ...<br> else if (res.equals("E")) ..<br>
+else ...<br>
+<br>Ale jest to dość uciążliwe i nieeleganckie. Narażone na
+błędy. Trudne do modyfikacji.<br>
+<br>A przecież wprowadzona litera daje nam natychmiastowe
+odniesienie do odpowiednich
+elementów tablic dest i price. Litera to znak. Znak ma swój kod. Kod
+jest
+liczbą. Łatwo jest więc przekształcić znaki w odpowiednie indeksy
+tablic.
+<br>Znak A powinien dać indeks 0, znak B - indeks 1, znak C -
+indeks 2.<br>
+Zauważmy, że: 'A' - 'A' = 0 , 'B'- 'A' = 1, 'C' - 'A' = 2 ...<br>
+Zatem wyliczenie odpowiedniego indeksu można zapisac tak:<br>
+indeks = &lt;wprowadzony_znak&gt; - 'A'<br>
+<br>No, ale musimy jeszcze sięgnąć po ten znak. Z dialogu
+dostajemy napis (łańcuch
+znakowy). To jest dana typu String, a nie char. Napis ten składa się z
+jednego znaku,
+znajdującego się na pierwszej pozycji łańcucha (czyli pod indeksem 0).
+Znak
+ten otrzymamy stosując metodę <b>charAt</b> z klasy String.<br>
+<br>Jeśli res oznacza wprowadzony napis, to - zamiast poprzedniej
+"piętrowej" konstrukcji if-else możemy po prostu napisać:<br>
+<br> int i = res.charAt(0) - 'A';<br>
+System.out.println(dest[i] + " - cena: " + price[i]);<br>
+<br><br>
+Cały program pokazano poniżej.<br>
+<pre>import static javax.swing.JOptionPane.*;
+
+public class Wycieczki {
+
+  public static void main(String[] args) {
+
+    String[] dest  = { "Bali", "Cypr", "Ibiza", "Kenia", "Kuba" };
+    double[] price = { 5000, 2500, 2800, 4500, 6000 };
+
+    String msg = "Wybierz kierunek - " +
+                 " wpisując literę A-"+ (char) ('A'+dest.length-1)+ ":\n";
+
+    for (int i=0; i &lt; dest.length; i++)
+      msg += (char) ('A' + i) + " - " + dest[i] + '\n';
+
+    String res;
+    while ((res = showInputDialog(msg)) != null) {
+      if (res.length() == 1) { 
+        int i = res.toUpperCase().charAt(0) - 'A';
+        if (i &lt; 0 || i &gt; dest.length -1) continue;
+        showMessageDialog(null, dest[i] + " - cena: " + price[i]);
+      }
+    }
+  }
+
+}
+</pre><div style="text-align: right;"><span style="font-style: italic;">Zobacz demo programu.</span><applet style="font-style: italic;" codebase="demo" code="starterApplet.StarterApplet.class" archive="StarterApplet.jar" align="right" height="70" vspace="20" width="250">
+<param name="className" value="wycieczki.Wycieczki">
+<param name="title" value="Demo programu Wycieczki"><param name="sourceCode" value="wycieczki/source.html">
+<param name="hasArgs" value="no"><param name="hasConsole" value="no">
+</applet>
+<br></div><br>Dodatkowe
+komentarze:<br>
+<ul><li>zastosowano statyczny import JOptionPane - można
+więc pisać krócej showInputFialog i showMessageDialog,</li><li>w
+oknie dialogowym wprowadzania danych tekst komunikatu (msg) składa
+się z kilku wierszy; tekst dzielimy na wiersze za pomocą znaku '\n',</li><li>program
+napisano w taki sposób, że przy zmianie liczby wycieczek należy
+zmienić tylko inicjacje tablic dest i price; inne fragmenty kodu nie
+ulegną
+zmianie,</li><li>przy tworzeniu komunikatu (msg) znowu
+wykorzystano możliwość traktowania
+znaków jako liczb (kody znaków); jednak operacje arytmetyczne na
+znakach
+dają w wyniku wartości typu int, a ponieważ chcemy pokazać znak , a nie
+jego
+kod (int) - to musimy jawnie przekształcić te wartości do typu char -
+stąd
+konieczność użycia operatora konwersji (char),</li><li>dopuszczamy
+by, użytkownik wprowadził małą literę zamiast dużej; w celu
+ujednolicenia stosujemy metodę toUpperCase().</li><li>jest
+sprawdzana poprawność&nbsp;napisu: musi się składać dokładnie z
+jednego znaku (sprawdzamy length()) i&nbsp;czy mieści się w
+przedziale A-E (if sprawdza zakres kodów).<br></li></ul><br>
+Spróbujmy teraz rozwiązać inne zadanie. Wyobraźmy sobie, że mamy
+dokument
+html o prostej strukturze, w którym kolejne tytuły punktów treści
+znajdują
+się między znacznikami &lt;h2&gt; ... &lt;/h2&gt;
+(tekst zawarty pomiędzy
+otwierającym znacznikiem &lt;h2&gt; i zamykającym znacznikiem
+&lt;/h2&gt;
+- traktowany jest jako nagłówek drugiego poziomu i odpowiednio do tego
+formatowany
+przy wyświetlaniu w przeglądarce).<br>
+Naszym zadaniem jest odnalezienie wszystkich takich nagłówków i
+stworzenie z nich tekstu, który zawiera każdy tytuł w nowej linii.<br>
+Niech&nbsp;klasa realizująca to zadanie (trochę na wyrost) nazywa
+się Toc. Przy tworzeniu obiektu
+tej klasy przekazujemy konstruktorowi cały dokument HTML w postaci
+łańcucha
+znakowego, a wywołanie metody String getToc() - ma zwrócić napis ze
+wszystkimi nagłówkami
+drugiego poziomu, rozdzielonymi separatorami nowego wiersza. Otrzymaną
+"listę"&nbsp; możemy
+następnie wypisać na konsoli lub zapisać do pliku.&nbsp;<br><br>
+Jak podejść do tego problemu?<br>
+W tekście dokumentu musimy kolejno znajdować początki nagłówków
+("&lt;h2&gt;"),
+a następnie "wyłuskiwać" podłańcuchy, które są zawarte pomiędzy
+znacznikami
+"&lt;h2&gt;" i "&lt;/h2&gt;". Do znajdowania napisów w
+napisie służy metoda
+indexOf, do "wyłuskiwania" podłacuchów metod substring. Uwaga:
+powinniśmy
+zastosować tę wersję metody indexOf, która zaczyna poszukiwanie od
+podanej
+pozycji łańcucha i wraz z postępem przeszukiwania odpowiednio zmieniać
+tę
+pozycję.<br>
+<br>Klasa Toc może wyglądać tak.<br><pre>package toc;
+
+public class Toc {
+
+   private String doc;           // przekazany dokument
+   private String toc = "";      // wynikowy spis treści
+
+   // separator końca wiersza; ponieważ jest zależny od systemu
+   // pobieramy go jako wartość tzw. właściwości systemowej
+
+   private final String ls = System.getProperty("line.separator");
+
+   public Toc(String doc) { // Konstruktor
+     this.doc = doc;
+   }
+
+  public String getToc() throws IllegalStateException {
+
+     int p = 0; // pozycja od której zaczynamy szukanie "&lt;h2&gt;"
+
+     while ((p = doc.indexOf("&lt;h2&gt;", p)) != -1) { // dopóki są "&lt;h2&gt;"
+
+       // poszukajmy znacznika zamykającego
+       // end jest indeksem pozycji na której on występuje
+
+       int end = doc.indexOf("&lt;/h2&gt;", p+4);
+
+       // jeżeli go nie ma ...
+
+       if (end == -1) throw new IllegalStateException("Invalid document structure");
+
+       // w przeciwnym razie: wyłuskujemy nagłówek
+       toc += doc.substring(p+4, end) + ls;  // ls - separator wierszy
+
+       p = end + 5;  // i przesuwamy pozycję od której będziemy dalej szukać
+     }
+
+     return toc;
+  }
+}</pre><i>
+Uwaga: w przypadku braku zamykającego znacznika &lt;/h2&gt;
+zgłaszany
+jest wyjątek IllegalStateException. Jest on pochodny od klasy
+RuntimeExecption, więc wołający metodę getToc() może go obsługiwać bądź
+nie. Mimo &nbsp;to w celach dokumentacyjnych wymieniono wyjątek w
+klauzuli throws. Ta wersja programu jest oczywiście niedoskonała
+-&nbsp; nie obsługuje przypadku wadliwej struktury
+dokumentu, gdy znacznik &lt;h2&gt; występuje pomiędzy
+znacznikami
+&lt;h2&gt;
+i &lt;/h2&gt;.<br>
+</i><br><a name="ind.NapLicz.20"></a>Przy okazji tego programu wykorzystaliśmy możliwość
+pobierania właściwości systemowych. Za pomocą odwołania:<br>
+<br> System.getProperty("line.separator") <br>
+<br> zapytaliśmy Javy jaki na danej platformie systemowej
+obowiązuje separator
+wierszy (w plikach), Zauważmy, że różne systemy stosują różne
+separatory (np.
+pod Unixem jest to 0a , a pod Windows 0d0a - szesnastkowo). Ponieważ
+nasz
+spis treści chcemy zapisywać do pliku to musimy użyć znaku separatora
+wierszy.
+A zgodnie z założeniami Javy (wieloplatformowość) powinniśmy
+przygotować
+program tak by działał bez rekompilacji na każdej platformie. Nb za
+pomocą metody getProperty z klasy System możemy pobierać różne inne
+właściwości systemowe (zob. ich spis w dokumentacji Javy).<br><br>Do
+testowania&nbsp;klasy Toc można wykorzystać następujący programik,
+który wczytuje dokument HTML z pliku, a spis treści zapisuje do innego
+pliku. <br><pre>import java.io.*;
+import java.util.*;
+import static javax.swing.JOptionPane.*;
+
+public class MainToc {
+
+  public static void main(String[] args) throws Exception {
+    Scanner fnameScan = new Scanner(showInputDialog("in out ?"));
+    File in = new File(fnameScan.next());
+    BufferedWriter out = new BufferedWriter(new FileWriter(fnameScan.next()));
+    Scanner inScan = new Scanner(in);
+    StringBuffer sb = new StringBuffer();
+    try {
+      while (inScan.hasNextLine())
+        sb.append(inScan.nextLine());
+      inScan.close();
+      Toc toc = new Toc(sb.toString());
+      out.write(toc.getToc());
+    } finally {
+      out.close();
+    }
+  }
+
+}</pre>Nazwy
+plików sa pobierane z dialogu wejściowego. &nbsp;Skaner fnameScan
+wyróżnia je z tekstu wpisanego w dialogu, skaner inScan czyta wiersze
+pliku wejściowego i tworzy z nich jeden długi tekst w StringBufferze.
+Tekst ten jest przekazywany klasie Toc, a otrzymany wynikowy spis
+treści zapisywany do pliku wyjściowego. Warto zwrócić uwagę na obsługę
+wyjatków. Metoda main wymienia klasę Exception w klauzuli throws, co
+zwalnia&nbsp; z ich obsługi w kodzie. Mimo to, zastosowano blok
+try,
+tym razem bez żadnego catch, ale za to z finally, po to by zapewnić
+zamknięcie pliku wyjściowego w każdej sytuacji (czy powstał jakiś
+wyjątek czy nie).<br><hr style="width: 100%; height: 2px;"><br>
+<a name="NapLicz.4"></a><h2>4.  Rozbiór tekstów i StringTokenizer</h2>
+<br><a name="ind.NapLicz.21"></a>Wyobraźmy sobie np., że łańcuch znakowy zawiera napisy
+reprezentujące liczbę
+całkowitą, dowolną (&gt;1) liczbę spacji, znak operacji
+arytmetycznej, dowolną (&gt;1) liczbę
+spacji i napis reprezentujący drugą liczbę całkowitą. Naszym zadaniem
+jest
+"wyłuskanie" z całego napisu napisów-liczb, przekształcenie ich do
+postaci
+binarnej i wykonanie na nich podanej operacji.<br><img style="border: 1px solid ; width: 195px; height: 158px; float: right;" alt="r" src="./Przetwarzanie danych_ napisy i liczby_files/symbole.jpg"><br>
+Napis taki może wyglądać następująco: "21 + 21"<br><br>
+Wyłuskiwane symbole są rozdzielone <b>separatorami</b>.<br>
+W przykładzie z liczbami separatorami będą spacje.<br>
+Dowolny ciąg znaków, który nie zawiera spacji - będzie symbolem.<br>
+Dowolna liczba spacji (&gt;1)będzie oddzielać symbole od siebie.<br><br><a name="ind.NapLicz.22"></a>Do wyłuskiwania symboli z łańcuchów znakowych można użyć klasy
+StringTokenizer z pakietu java.util.<br>
+Po to by dokonać rozbioru tekstu - tworzymy obiekt klasy
+StringTokenizer,
+podając jako argument konstruktora - tekst do rozbioru np.<br>
+<br><pre>String expr = "21 + 21";
+StringTokenizer st = new StringTokenizer(expr);
+</pre>
+Ta postać konstruktora zaklada domyślnie, że separatorami są znaki z
+następujacego zestawu <code>" \t\n\r\f"</code> (czyli znak
+spacji, tabulacji, przejścia do nowego wiersza, powrotu karetki,
+nowej strony - tzw. "Białe znaki"). W tym przypadku symbolami będą ciągi znaków, które nie
+zawierają
+żadnego z wymienionych separatorów.<br>
+<br>Obiektu klasy StringTokenizer możemy teraz zapytać o to ile
+symboli zawiera przekazany konstruktorowi napis:<br>
+<pre>int n = st.countTokens(); // n = 3</pre><br>
+Wyłuskiwanie symboli odbywa się sekwencyjnie poczynając od początku
+łańcucha. Służy temu metoda <b>nextToken()</b>
+, która zwraca kolejny symbol jako String. Pierwsze wywołanie tej
+metody
+zwróci pierwszy symbol, następne - będą zwracać kolejne symbole
+łańcucha.
+<br><pre>String s1 = st.nextToken(); // napis "21"
+String s2 = st.nextToken(); // napis "+"
+String s3 = st.nextToken(); // napis "21"
+</pre>
+Gdy nie ma już symboli "do zwrotu" - wywołanie nextToken() spowoduje
+powstanie wyjątku NoSuchElementException.<br>
+<br>Zatem zawsze przeglądamy łańcuch od początku i "wyłuskując"
+symbole przesuwamy
+się do jego końca (uwaga: kolejne symbole są zwracane, ale oczywiście -
+nie
+są usuwane z łańcucha).<br>
+<br>Do stwierdzenia, czy w łańcuchu znakowym są jeszcze symbole
+do zwrotu służy metoda hasMoreTokens().<br>
+Metoda hasMoreTokens() zwraca true, jeśli w łańcuchu znakowym są
+jeszcze
+nie "wyluskane" symbole i false w przeciwnym razie. Inaczej mówiąc:
+hasMoreTokens()
+zwraca true, jeśli następne odwołanie do nextToken() zwróci kolejny
+symbol
+i zwraca false, gdy ew. następne odwołanie do nextToken() spowoduje
+wyjątek
+NoSuchElementException.<br>
+<br>Łatwo zapisać pętle, w której będziemy pobierać kolejne
+symbole:
+<pre>while (st.hasMoreTokens()) {
+  Sring s = st.nextToken();
+  // ... tu coś robimy z s
+}
+</pre><br>
+Wiedząc to wszystko można teraz napisać program, który w oknie
+dialogowym
+prosi użytkownika o wprowadzeia liczby całkowitej, spacji, operatora,
+spacji
+i drugiej liczby i wykonuje żądaną operację arytmetyczną na tych dwóch
+liczbach. Jeśli użytkownik wprowadził wadliwe dane, to program prosi go
+o ich poprawienie. Pierwsza wersja tego programu może wyglądać tak:<br><pre>import java.util.*;
+import static javax.swing.JOptionPane.*;
+
+public class Oper {
+
+  public static void main(String[] args) {
+
+    String normalQuest = "Liczba1 op Liczba2",     // normalny komunikat
+           errorQuest = "Wadliwe dane. Popraw.\n", // komunikat w przypadku błędu
+           quest = normalQuest;
+
+    String expr = "";                              // wyrażenie do obliczenia 
+
+    while ((expr = showInputDialog(quest, expr)) != null) {
+
+      StringTokenizer st = new StringTokenizer(expr);
+
+      if (st.countTokens() != 3) {  // jeżeli za mało lub za dużo symboli
+          quest = errorQuest;
+          continue;
+      }
+
+      String snum1 = st.nextToken(),   // pierwsza liczba (napisowo)
+             sop  = st.nextToken(),    // symbol operatora
+             snum2 = st.nextToken();   // druga liczba (napisowo)
+      
+      int num1 = 0, num2 = 0, res = 0; // liczbt do obliczeń i wynik 
+      
+      try {
+        num1 = Integer.parseInt(snum1);
+        num2 = Integer.parseInt(snum2);
+      } catch (NumberFormatException exc) { // jeżeli napisy nie są liczbami całkowitymi
+          quest = errorQuest;               // komunikat o błędzie 
+          continue;
+      }
+      
+      char op = sop.charAt(0);
+      
+      // jezeli napis oznaczający operator za długi (np. ktoś wprowadził +*)
+      // lub gdy w ilorazie dzialnik jest zerem - błąd
+      if (sop.length() != 1 || (op == '/' &amp;&amp; num2 == 0)) {  
+        quest = errorQuest;
+        continue;
+      }
+
+      switch (op) {
+        case '+' : res = num1 + num2; break;
+        case '-' : res = num1 - num2; break;
+        case '*' : res = num1 * num2; break;
+        case '/' : res = num1 / num2; break;
+        default: {                           // wadliwy operator
+          quest = errorQuest;
+          continue;
+        }
+      }
+      showMessageDialog(null, "Wynik = " + res);
+      quest = normalQuest;
+      expr = "";            // w kolejnym dialogu inicjalny tekst ma być pusty
+    }
+
+  }
+
+}</pre>Uwaga:
+w programie zastosowano wersję metody showInputDialog, w której drugi
+argument oznacza inicjalny napis umieszczony w polu tekstowym dialogu.
+Normalnie będzie to pusty tekst, ale w przypadku błędu umieścimy w polu
+tekstowym błędny napis, tak aby od razu można go było poprawić.<br><br>Na
+marginiesie warto zauważyć, że ten program można napisać znacznie
+krócej, korzystając ze zgłaszania wyjątków i ich uogólnionej obsługi,
+co pokazuje poniższy kod. <br><pre>import java.util.*;
+import static javax.swing.JOptionPane.*;
+
+public class Oper1 {
+
+  public static void main(String[] args) {
+
+    String normalQuest = "Liczba1 op Liczba2",
+           errorQuest = "Wadliwe dane. Popraw.\n" + normalQuest,
+           quest = normalQuest,
+           expr = "";
+
+    while ((expr = showInputDialog(quest, expr)) != null) {
+      int res;
+      try {
+        StringTokenizer st = new StringTokenizer(expr);
+        int num1 = Integer.parseInt(st.nextToken());
+        String sop = st.nextToken();
+        int num2 = Integer.parseInt(st.nextToken());
+        
+        if (sop.length() != 1 || st.hasMoreTokens()) 
+          throw new IllegalArgumentException();
+      
+        
+        switch (sop.charAt(0)) {
+          case '+' : res = num1 + num2; break;
+          case '-' : res = num1 - num2; break;
+          case '*' : res = num1 * num2; break;
+          case '/' : res = num1 / num2; break;
+          default  : throw new IllegalArgumentException();
+        }
+      } catch (Exception exc) {
+        quest = errorQuest;
+        continue;
+      }
+      showMessageDialog(null, "Wynik = " + res);
+      quest = normalQuest;
+      expr = "";
+    }
+    
+  }
+
+}</pre><div style="text-align: right;"><span style="font-style: italic;">Zobacz demo programu</span><applet style="font-style: italic;" codebase="demo" code="starterApplet.StarterApplet.class" archive="StarterApplet.jar" align="right" height="70" vspace="20" width="250">
+<param name="className" value="oper.Oper1"><param name="title" value="Demo programu Oper1"><param name="sourceCode" value="oper/source.html">
+<param name="hasArgs" value="no"><param name="hasConsole" value="no"></applet><span style="font-style: italic;">
+</span><br></div><br>Tutaj, w przypadku za
+małej liczby symboli powstaje wyjątek NoSuchElementException. Jeśli
+napisy-argumenty nie dają się zinterpretować jako liczby całkowite -
+NumberFormatExcepetion. Gdy mamy dzielenie przez zero -
+ArithmeticException. Inne błędy (za dużo symboli, za długi napis na
+oznaczenie operatora, nieznany operator) sygnalizujemy sami zgłaszając
+wyjątek IllegalArgumentException. Wszystkie te wyjątki (a zatem błędy)
+są obsługiwane w jednym miejscu i kod jest bardziej zwarty, logiczny.
+&nbsp;<br><br>
+Inna postać konstruktora klasy StringTokenizer pozwala na określenie
+zbioru
+separatorów, które będą służyć do wyróżniania symboli.<br>
+Jeżeli napiszemy np.<br>
+<br>StringTokenizer st = new StringTokenizer(s, "., " - to
+sepaartorami będą kropka, przecinek i spacja.<br>
+<br>Zadanie:<br> Stworzyć klasę Words, której obiekty będą
+zawierać tablicę
+słów napisu przekazanego jako argument konstruktora. Za słowa uznajemy
+ciągi
+znaków rozdzielonych spacjami i znakami interpunkcji.<br>
+W klasie dostarczyć metod:<br>
+getWordsCount() - zwraca liczbę słów<br>
+getWord(int i) - zwraca i-te słowo napisu (i =1,2, ... n; gdzie n
+liczba słów w napisie)<br>
+getWords() - zwraca tablicę słów<br>
+getMaxLenWord() - zwraca najdłuższe słowo<br>
+getMinLenWord() - zwraca najkrótsze słowo<br>
+<br>Możliwe rozwiązanie:<br><br><pre>import java.util.*;
+
+public class Words {
+
+  private String[] words;      // tablica slów
+  private String maxLenWord;   // słowo o max długości
+  private String minLenWord;   // słowo o minimalnej długości
+
+  // Konstruktor
+  public Words(String txt) throws IllegalArgumentException {
+
+    // Sprawdzamy czy przekazano właściwy argument
+    if (txt == null) 
+      throw new IllegalArgumentException("Wadliwy argument konstruktora Words: null"); 
+
+    // Uwzględniamy bogaty zestaw separatorów słów
+    StringTokenizer st = new StringTokenizer(txt, " \t\n\r\f.,:;()[]\"'?!-{}");
+     
+    int n = st.countTokens();      // ile słów?
+    if (n == 0) 
+      throw new IllegalArgumentException("Wadliwy argument konstruktora Words: napis nie zawiera słów");
+    
+    words = new String[n];         // utworzenie tablicy słów
+    words[0] = st.nextToken();     // pierwsze słowo
+    int maxL = words[0].length(),  // max i min długość (na razie = długości pierwszego słowa)
+        minL = maxL;                          
+
+    int i = 1;                     // kolejny indeks w tablicy
+
+    while (st.hasMoreTokens()) {   // dopóki są slowa
+      String s = st.nextToken();
+      int len = s.length();
+      if (len &gt; maxL) {            // maksymalna długość ?
+         maxL = len;
+         maxLenWord = s;
+      }
+      if (len &lt; minL) {            // minimalna długość ?
+        minL = len;
+        minLenWord = s;
+      }
+      words[i++] = s;              // slowo -&gt; do tablicy; zwiększenie indeksu
+    }
+  }
+
+  // Zwraca liczbę słów
+  public int getWordsCount() {
+    return words.length;
+  }
+
+  // Zwraca i-te słowo (liczymy od 1)
+  // jeśli podano wadliwy indeks - zwraca null
+  public String getWord(int i) {
+    return (i &lt; 1 || i &gt; words.length) ? null : words[i-1];
+  }
+
+  // Zwraca tablicę slów
+  public String[] getWords() {
+    return words;
+  }
+
+  // Zwraca slowo o max długości
+  public String getMaxLenWord() {
+    return maxLenWord;
+  }
+  // Zwraca slowo o min długości
+  public String getMinLenWord() {
+    return minLenWord;
+  }
+
+
+}</pre>I
+klasa testująca:<br><pre>import static javax.swing.JOptionPane.*;
+
+public class TestWords {
+
+  public static void main(String[] args) {
+    String txt;
+    while ((txt = showInputDialog("Wpisz tekst")) != null) {
+      Words w = new Words(txt);
+      int n = w.getWordsCount();
+      System.out.println("Liczba słów: " + n);
+      System.out.println("Kolejne slowa: ");
+      for (int i=1; i &lt;= n; i++) System.out.println(w.getWord(i));
+      int iw = Integer.parseInt(showInputDialog("Podaj numer słowa:"));
+      System.out.println("Słowo o numerze " + iw + ": " + w.getWord(n+1));
+      System.out.println("Kolejne slowa: ");
+      String[] words = w.getWords();
+      for (String wrd : words) System.out.println(wrd);
+      System.out.println("Najdluższe słowo: " + w.getMaxLenWord());
+      System.out.println("Najkrótsze słowo: " + w.getMinLenWord());
+    }
+  }
+
+}</pre><div style="text-align: right;"><span style="font-style: italic;">Zobacz demo działania programu.</span><applet codebase="demo" code="starterApplet.StarterApplet.class" archive="StarterApplet.jar" align="right" height="70" vspace="20" width="250">
+<param name="className" value="words.TestWords"><param name="title" value="Demo programu Words"><param name="sourceCode" value="words/source.html">
+<param name="hasArgs" value="no"><param name="hasConsole" value="yes"></applet>
+<br></div><br>
+Java udostępnia również szereg innych sposobów składniowej analizy tekstów.
+Klasa StreamTokenizer (podobna do StringTokenizer) dostarcza nieco bardziej
+zaawansowanych sposobów rozbioru tekstu, ale wymaga operowania na strumieniach.<br>
+Gdy mamy do czynienia z dokumentami HTML - możemy zastosować parsery HTML (ze standardu
+Javy lub zewnętrzne). Do przetwarzania dokumentów XML standardowa wersja Javy
+przeznacza&nbsp; bogate i różnorodne środki.<br><br>Bardzo mocne i elastyczne możliwości analizy składniowej dają też <i><b>wyrażenia regularne</b></i>.<br><hr style="width: 100%; height: 2px;"><br>
+<a name="NapLicz.5"></a><h2>5.  Wyrażenia regularne</h2>
+<a name="ind.NapLicz.23"></a>W dokumentacji klasy StringTokenizer można przeczytać, że do rozbioru tekstów lepiej jest stosować metodę split z klasy String. <br>Wywołanie: <br><br>&nbsp;&nbsp;&nbsp; txt.split(sep);<br><br>zwraca tablicę symboli napisu <span style="font-style: italic;">txt</span> rozdzielonych separatorami pasującymi do wzorca podanego przez napis - wyrażenie regularne <span style="font-style: italic;">sep</span>. <br><br>Trzeba więc pamiętać o tym, że w metodzie split podajemy jako argument
+wyrażenie regularne. Niezbędna jest zatem
+wiedza o składni i znaczeniu wyrażeń regularnych. Bez tego łatwo jest
+wpaść w pułapkę i otrzymać nieoczekiwane wyniki. <br>Przykładowe różnice w działaniu StringTokenizera i&nbsp; metody split pokazuje poniższa tablica.<br><br><table style="text-align: left; width: 100%;" border="1" cellpadding="2" cellspacing="2"><tbody><tr><td colspan="1" rowspan="2"></td><td colspan="1" rowspan="2" style="text-align: center;">Tekst<br>txt</td><td colspan="1" rowspan="2" style="text-align: center;">Separator<br>sep</td><td colspan="2" rowspan="1">StringTokenizer st = <br>&nbsp; &nbsp; &nbsp;new StringTokenizer(txt, sep)</td><td colspan="2" rowspan="1">String[] s = txt.split(sep)</td></tr><tr><td style="text-align: center;">Liczba <br>symboli: <br>st.countTokens()</td><td style="text-align: center;"><br>Wyróżnione<br>symbole: <br>st.nextToken()<br>&nbsp;</td><td style="text-align: center;">Liczba<br>symboli: <br>s.length</td><td style="text-align: center;">Wyróżnione <br>symbole: <br>s[i]</td></tr><tr><td>1</td><td>"ala ma kota i psa"</td><td style="text-align: center;">" "</td><td style="text-align: center;">5</td><td>0: Ala<br>1: ma<br>2: kota<br>3: i<br>4: psa</td><td style="text-align: center;">5</td><td>0: Ala<br>1: ma<br>2: kota<br>3: i<br>4: psa</td></tr><tr><td>2</td><td>"ala ma kota &nbsp;i &nbsp;psa"</td><td style="text-align: center;">" "</td><td style="text-align: center;">5</td><td>0: Ala<br>1: ma<br>2: kota<br>3: i<br>4: psa</td><td style="text-align: center;">7</td><td>0: Ala<br>1: ma<br>2: kota<br>3: <br>4: i<br>5: <br>6: psa</td></tr><tr><td>3</td><td>"Pierwszy.Drugi.Trzeci"</td><td style="text-align: center;">"."</td><td style="text-align: center;">3</td><td>0: Pierwszy<br>1: Drugi<br>2: Trzeci</td><td style="text-align: center;">0</td><td></td></tr></tbody></table><br><br>W
+przypadku (1) wyniki są identyczne, ale podobieństwo jest mylące.
+Przypadek (2) pokazuje, że split traktuje separator bardzo dosłownie: ma to
+być jedna spacja. W tekście wyszukiwane są podnapisy ograniczane
+separatorem (jedną spacją) lub końcem wiersza. Dlatego, jako wyróżnione
+&nbsp;symbole pojawią się (na pozycji 3 i 5) puste podnapisy (np.
+podnapis "kota" na poz. 2 ograniczony jest spacją, za nią jest jeszcze
+jedna spacja - pomiędzy tymi dwoma spacjami znajdzie się więc element -
+pusty podnapis). &nbsp;Po to, by uzyskać zamierzony (taki sam jak przy
+użyciu StringTokenizera) efekt trzeba w split podać wyrażenie regularne
+"jedna lub więcej spacji", co zapisujemy za pomocą tzw. kwantyfikatora
+&nbsp;+: " +".<br><pre>String[] s = txt.split(" +");</pre>da w wyniku tablicę wszystkich podnapisów napisu txt rozdzielonych co najmniej jedną spacją.<br><br>W
+przypadku (3) StringTokenizer bardzo ładnie rozbił podany tekst na
+separatorze "." (kropka), natomiast metoda split nie wyróżniła żadnych
+symboli. Stało się tak dlatego, że kropka w składni wyrażeń regularnych
+ma specjalne znaczenie (dowolny znak), wobec tego w tekście nie ma
+żadnego podnapisu zakończonego separatorem (są tylko same separatory).
+Aby użyć w &nbsp;wyrażeniu regularnym znaku, który ma specjalne
+znaczenie należy go poprzedzić odwrotnym ukośnikiem, przy czym ze
+względu na to, że odwrotny ukośnik ma w zapisie Stringów znaczenie
+"symbolu ucieczki" musimy zapisać go literalnie jako dwa odwrotne
+ukośniki.<br>Zatem dopiero poprzez:<br><pre>String[] s = txt.split("\\.");&nbsp;</pre>uzyskamy tablicę podnapisów napisu txt rozdzielonych kropką.<br><br>W&nbsp;
+prostych przypadkach użycie StringTokenizera może się wydać
+wygodniejsze, ale jest wiele sytuacji, w których za jego pomocą nie
+sposób osiągnąć wymaganego efektu i wtedy wyrażenia regularne mogą
+okazać się bardzo pomocne.<br>Na pewno więc warto się z nimi
+zaznajomić. Tutaj przedstawione zostanie tylko kilka ogólnych
+informacji wprowadzających w to zagadnienie, a także krótkie praktyczne przykłady. Więcej szczegółów
+można uzyskać z dokumentacji.<br><br><br><div class="def"><a name="ind.NapLicz.24.NapLicz.24"></a>Regularne wyrażenie stanowi opis wspólnych cech (składni) zbioru łańcuchów znakowych</div><br>
+<br>
+Możemy sobie wyobrażać, że regularne wyrażenie jest pewnym wzorcem, który
+opisuje jeden lub wiele napisów, pasujących do tego wzorca. Wzorzec taki
+zapisujemy za pomocą specjalnej składni wyrażeń regularnych.<br>
+<br>
+Najprostszym wzorcem jest po prostu sekwencja znaków, które nie mają specjalnego znaczenia (sekwencja <b>literałów</b>).<br>
+Np. wyrażenie regularne abc stanowi wzorzec opisujący trzy występujące po
+sobie znaki: a, b, i c. Wzorzec ten opisuje jeden napis "abc".<br>
+<br>
+We wzorcach możemy stosować znaki specjalne (tzw. <b>metaznaki</b>) oraz tworzone za ich pomocą konstrukcje składniowe. Do znaków specjalnych należą:<br>
+<br>
+<table border="1" cellpadding="4" width="300">
+<tbody><tr><td>$</td><td>^</td><td>.</td><td>*</td><td valign="top"><br>
+      </td>
+</tr><tr><td>+</td><td>?</td><td>[</td><td>]</td><td valign="top"><br>
+      </td>
+</tr><tr><td>(<br>
+</td><td>)&nbsp;</td><td>{&nbsp;</td><td>}<br>
+</td><td valign="top">\<br>
+      </td>
+</tr></tbody>
+</table>
+Uwagi: <br>
+<ol><li>jeśli chcemy traktować znaki specjalne jako literały - poprzedzamy je odwrotnym ukośnikiem \.</li><li>w niektórych konstrukcjach składniowych metaznaki tracą specjalne znaczenie i są traktowane literalnie.</li></ol>Za pomocą znaków specjalnych i tworzonych za ich pomocą bardziej rozbudowanych konstrukcji składniowych opisujemy m.in.
+<ul><li><a name="ind.NapLicz.25"></a>wystąpienie <span style="font-weight: bold;">jednego</span> z wielu znaków - odpowiednie konstrukcje składniowe noszą nazwę <b>klasy znaków</b>:</li><ul><li>prosta klasa znaków stanowi ciąg znaków ujętych w nawiasy kwadratowe np. [123abc] określa dowolny ze znaków 1, 2, 3, a, b, c,</li><li>zakres znaków (zapisywany z użyciem -), np. [0-9] - dowolna cyfra,</li><li>negacja klasy znaków - jeśli pierwszym znakiem w nawiasach kwadratowych jest <b>^</b>, to dopasowanie nastąpi dla każdego znaku <b>oprócz</b> wymienionych na liście.&nbsp;<br>
+Np. do wzorca [^abc] będzie pasował każdy znak oprócz a, b i c,</li><li>klasy predefiniowane (wprowadzane za pomocą specjalnych symboli) np.</li><ul><li>.&nbsp;(kropka) - klasa wszystkich znaków (każdy znak pasuje do tego&nbsp;wzorca),</li><li>\d - cyfra, \D - nie-cyfra,</li><li>\w - jeden ze znaków: [a-zA-Z0-9] (znak dopuszczalny w słowie),</li><li>\p{Punct} -znak interpunkcji - skrót dla [!
+"#$%&amp;'()*+,-./:;&lt;=&gt;?@[\]^_`{|}~]</li><li>\p{L} - dowolna litera (Unicode).</li></ul></ul><li><a name="ind.NapLicz.26"></a>początek lub koniec ograniczonego ciągu znaków (np. wiersza lub słowa) - <b>granice</b>,</li><ul><li>np. ^ początek wiersza, $ - koniec wiersza,</li></ul><li><a name="ind.NapLicz.27"></a>powtórzenia - w składni wyrażeń regularnych opisywane przez tzw. <b>kwantyfikatory,</b></li><ul><li>np. kwantyfikator * oznacza wystąpienie 0 lub więcej razy, a kwantyfikator +&nbsp;wystąpienie co najmniej jeden raz.&nbsp;</li><li>
+w przypadku gdy kwantyfikator następuje po literale - wymagane jest wystąpienie
+(liczba wystąpień zależy od kwantyfikatora, w szczególności może być 0) tego
+literału np. "12a+" oznacza 1, potem 2, następnie wystąpienie znaku 'a' jeden
+lub więcej razy (uwaga: "12a+" nie oznacza wystąpienia ciągu znaków 12a jeden lub więcej razy),</li><li>
+gdy kwantyfikator występuje po klasie znaków - dotyczy dowolnego znaku z
+tej klasy. Np. [abc]+ oznacza wystąpienie jeden lub więcej razy znaku a,
+lub znaku b, lub znaku c,</li><li>
+jeśli natomiast chcemy, by kwantyfikator dotyczył dowolnego wyrażenia regularnego <b>X</b> - &nbsp;to powinniśmy zastosować jedną z poniższych konstrukcji składniowych:<br>
+<b>(X)<i>symbol_kwantyfikatora</i><br>
+(?:X)<i>symbol_kwantyfikatora</i></b><br>
+Konstrukcje takie tworzą tzw. grupy. Grupy ujęte w nawiasy okrągłe (pierwsza
+z w/w form składniowych) służą też do zapamiętywania tekstu pasującego
+do wzorca podanego w nawiasach (możemy się później do tego dopasowania odwołać). Druga forma służy wyłącznie grupowaniu, bez
+zapamiętywania. Przykład: (?:12a)+ - jedno lub więcej wystąpień napisu "12a";</li><li>kwantyfikatory
+mogą być: <span style="font-weight: bold;">zachłanne</span> (domyślnie) lub <span style="font-weight: bold;">wstrzemięźliwe</span>. Przy zastosowaniu
+kwantyfikatorów zachłannych uzyskujemy najdłuższe możliwe dopasowanie
+np. regularne wyrażenie "1.3" zastosowane wobec tekstu "123123"
+dopasuje cały tekst "123123". Kwantyfikatory wstrzemięźliwe odnajdują
+możliwie najkrótsze dopasowanie, wprowadza się je poprzez dodanie znaku
+zapytania do kwantyfikatora np. wyrażenie regularne "1.*?3" w tekście
+"123123" dopasuje podnapis "123";</li></ul><li><span style="font-weight: bold;">flagi</span>, które modyfikują sposób interpretacji wyrażenia regularnego, np.:&nbsp;</li><ul><li>(?i) porównywanie liter bez uwzględnienia ich wielkości,</li><li>(?s) dopasowanie kropki (symbolu dowolnego znaku) również do znaku końca wiersza;</li></ul><li>logiczne kombinacje wyrażeń regularnych, np. &nbsp;a+|b - jedno lub więcej wystąpień znaku a lub znak b.<br>
+  </li></ul><br>
+Wyrażeń regularnych możemy użyć m.in. do: <br>
+<ul><li>stwierdzenia czy dany napis pasuje do podanego przez wyrażenie wzorca,</li><li>stwierdzenia czy dany napis zawiera podłańcuch znakowy pasujący do
+podanego wzorca i ew. uzyskania tego podnapisu i/lub jego pozycji w napisie,</li><li>zamiany części napisu, pasujących do wzorca na inne napisy,</li><li>wyróżniania części napisu, które są rozdzielane ciągami znaków pasującymi do podanego wzorca. </li></ul><a name="ind.NapLicz.28"></a>W Javie do najogólniejszego posługiwania się wyrażeniami regularnymi służą klasy pakietu java.util.regex: <b>Pattern i Matcher</b>.<br>
+<br>
+Przed zastosowaniem wyrażenia regularnego do składniowej analizy jakiegoś napisu musi ono być skompilowane. Obiekty klasy <b>Pattern</b> reprezentują skompilowane wyrażenia regularne, a obiekty te uzyskujemy za pomocą statycznych metod klasy Pattern - <b>compile(...)</b>, mających za argument tekst wyrażenia regularnego.<br>
+Obiekty klasy <b>Matcher</b> wykonują operacje wyszukiwania&nbsp;
+w tekście za pomocą interpretacji skompilowanego wyrażenia regularnego i
+dopasowywania go do tekstu lub jego części.<br>
+Obiekt-matcher jest zawsze związany z danym wzorcem. Zatem uzyskujemy go od obiektu-wzorca za pomocą metody <b>matcher(...)</b>
+&nbsp;klasy Pattern, podając jako jej argument przeszukiwany tekst. Następnie
+możemy dokonywać różnych operacji przeszukiwania i zastępowania tekstu poprzez
+użycie różnych metod klasy Matcher. <br>
+W szczególności: <br>
+<ul><li>metoda <b>matches()</b> stara się dopasować do wzorca cały podany łańcuch znakowy i zwraca true, jeśli się to udało, false w przeciwnym razie,</li><li>metoda <b>find()</b>&nbsp; przeszukuje wejściowy łańcuch znakowy i wyszukuje kolejne pasujące do wzorca jego podłańcuchy,</li><li>metoda <span style="font-weight: bold;">group()</span> zwraca ostatnio dopasowany tekst,</li><li>metoda <span style="font-weight: bold;">start()</span> zwraca początkową pozycję ostatnio dopasowanego tekstu,</li><li>metoda <span style="font-weight: bold;">end()</span> zwraca końcową pozycję ostatnio dopasowanego tekstu,</li><li>metoda <span style="font-weight: bold;">group(int n)</span> zwraca n-tą grupę (n &gt;=1) ostatnio dopasowanego tekstu (grupy w wyrażeniu regularnym&nbsp;oznaczamy nawiasami okrągłymi),</li><li>metoda <span style="font-weight: bold;">replaceFirst(String rpl)</span>
+zastępuje pierwsze wystąpienie dopasowanego tekstu tekstem podanym jako
+rpl (w tekście zastępującym możemy odwoływać się do zapamiętanych grup),</li><li>metoda<span style="font-weight: bold;"> replaceAll(String rpl)</span>
+zastępuje wszystkie wystąpienia dopasowanego tekstu tekstem podanym w
+rpl (w tekście zastępującym możemy odwoływać się do zapamiętanych grup).</li></ul>Do rozbioru tekstów służą natomiast metody <span style="font-weight: bold;">split(...) </span>z klasy Pattern.<br><br><a name="ind.NapLicz.29"></a>Przykłady.<br><br><span style="font-weight: bold;">A. Metoda matches() stwierdza czy cały tekst pasuje do wzorca.</span><br><pre>import java.util.regex.*;
+
+public class Sample1 {
+
+  public static void main(String[] args) {
+    // Wzorzec: jedno lub więcej wystąpień dowolnej cyfry
+    String regex = "[0-9]+";
+
+    // Kompilacja wzorca
+    Pattern pattern = Pattern.compile(regex);
+
+    // Tekst wejściowy 
+    String txt = "196570";
+    
+    // Uzyskanie matchera
+    Matcher matcher = pattern.matcher(txt);
+
+    // Czy tekst pasuje do wzorca?
+
+    boolean match = matcher.matches();
+
+    System.out.println("Tekst: " + txt + '\n' + 
+                       (match ? " " : " NIE ") + "pasuje do wzorca: " + regex);
+
+    // Nowy tekst wejściowy
+    txt = "123 996";
+    // reset matchera "zeruje" jego stany i pozwala też na podanie nowego tekstu
+    matcher.reset(txt);
+    match  = matcher.matches();
+    System.out.println("Tekst: " + txt + '\n' + 
+        (match ? " " : " NIE ") + "pasuje do wzorca: " + regex);
+  }
+
+}</pre>wynik:<br><div class="listing100">Tekst: 196570<br>&nbsp;pasuje do wzorca: [0-9]+<br>Tekst: 123 996<br>&nbsp;NIE pasuje do wzorca: [0-9]+<br></div><br><span style="font-weight: bold;">B. Metoda find() odnajduje w napisie kolejne podnapisy pasujące do wzorca.</span><br style="font-weight: bold;"><br><pre>iimport java.util.regex.*;
+
+public class Sample2 {
+
+  public static void main(String[] args) {
+    // Wzorzec: jedno lub więcej wystąpień dowolnej cyfry
+    String regex = "[0-9]+";
+
+    // Tekst wejściowy 
+    String txt = "123 996";
+    
+    System.out.println("Tekst: \n" + "'" + txt + "'" + 
+                       "\nWzorzec: " + "'" + regex + "'");
+
+    // Kompilacja wzorca
+    Pattern pattern = Pattern.compile(regex);
+
+    // Uzyskanie matchera
+    Matcher matcher = pattern.matcher(txt);
+    
+    String result = "";  // do prezentacji wyników wyszukiwania
+    
+    // Zastosujemy metodę find()
+    // Jej wywołanie zwraca true po znalezieniu pierwszego
+    // pasującego do wzorca podłańcucha w tekście.
+    // Kolejne wywołania pozwalają wyszukiwać kolejne pasujące podłańcuchy;
+    // wynik false oznacza, że w tekście nie ma pasujących podłańcuchów
+    
+    while (matcher.find()) {
+      result += "\nDopasowano podłańcuch '" + 
+        matcher.group() + "'" +                // group() zwraca ostatni dopasowany tekst 
+        "\nod pozycji " + matcher.start() +    // start() zwraca jego poczatkową pozycję
+        "\ndo pozycji " + matcher.end();       // end() zwraca pozycję po ostatnim dopasowanym znaku
+    }
+    
+ 
+    if (result.equals("")) result = "Nie znaleziono żadnego podnapisu " +
+                                    "pasującego do wzorca";
+    System.out.println(result);
+  }
+
+}</pre>wynik:<br><div class="listing100">Tekst: <br>'123 996'<br>Wzorzec: '[0-9]+'<br><br>Dopasowano podłańcuch '123'<br>od pozycji 0<br>do pozycji 3<br>Dopasowano podłańcuch '996'<br>od pozycji 4<br>do pozycji 7<br><br></div><br><span style="font-weight: bold;">C.
+Używając grup (ujmując odpowiednie fragmenty wyrażenia regularnego w
+&nbsp;nawiasy okrągłe) możemy łatwo wyłuskiwać fragmenty dopasowanego
+tekstu.</span><br><pre>import java.util.regex.*;
+
+public class Sample3 {
+
+  public static void main(String[] args) {
+    // Wzorzec: 
+    // jedno lub więcej wystąpień dowolnej cyfry (grupa, bo w nawiasach)
+    // po czym jeden lub więcej białych znaków
+    // po czym jedna lub więcej liter Unicode (grupa 2, w nawiasach)
+    // po czym jeden lub więcej białych znaków
+    // po czym dowolna liczba całkowita &gt; 1 (grupa 3, w nawiasach)
+    
+    String regex = "<span style="color: rgb(255, 0, 0); font-weight: bold;">([0-9]+)</span>\\s+<span style="color: rgb(51, 51, 255); font-weight: bold;">(\\p{L}+)</span>\\s+<span style="color: rgb(0, 153, 0); font-weight: bold;">([1-9][0-9]*)</span>";
+
+    // Tekst wejściowy 
+    String txt = "1111 Odkurzacz 20";
+    
+    System.out.println("Tekst: " + "'" + txt + "'" + 
+                       "\nWzorzec: " + "'" + regex + "'");
+
+    // Kompilacja wzorca
+    Pattern pattern = Pattern.compile(regex);
+
+    // Uzyskanie matchera
+    Matcher matcher = pattern.matcher(txt);
+    
+    // Dopasowanie tekstu
+    boolean isMatching = matcher.matches();
+    if (isMatching) {
+      int n = matcher.groupCount();      // ile jest grup
+      for (int i = 1; i &lt;=n; i++) {
+        String grupa = matcher.group(i); // pobranie zawartości i-ej grupy (numeracja od 1)
+        System.out.println("Grupa " + i + 
+                           " = '" + grupa + "'");
+      }
+    } else System.out.println("Tekst nie pasuje do wzorca");
+    
+  }
+
+}</pre>wynik:<br><div class="listing100">Tekst: '1111 Odkurzacz 20'<br>Wzorzec: '([0-9]+)\s+(\p{L}+)\s+([1-9][0-9]*)'<br>Grupa 1 = '1111'<br>Grupa 2 = 'Odkurzacz'<br>Grupa 3 = '20'<br></div><br><span style="font-weight: bold;">D. Używając metody split() z klasy Pattern można dokonać rozbioru tekstu</span><br><pre>public class Sample4 {
+
+  public static void main(String[] args) {
+    // ogólny wzorzec separatorów do wyróżniania słów:
+    // separatorem jest 1 lub więcej "białych znaków" lub znaków interpunkcji
+    String regex = "[\\s\\p{Punct}]+";
+
+    // Tekst wejściowy 
+    String txt = "Ala(11), kot,; pies-1 &lt;kot2&gt;[mrówka]";
+    
+    // Kompilacja wzorca
+    Pattern pattern = Pattern.compile(regex);
+    String[] words = pattern.split(txt);     // inaczej wołane niż  split() z klasy String
+    
+    System.out.println("Liczba wyróżnionych słów: " + words.length);
+    for (String w : words) {
+      System.out.println(w);
+    }
+  }
+
+}</pre>wynik:<br><div class="listing100">Liczba wyróżnionych słów: 7<br>Ala<br>11<br>kot<br>pies<br>1<br>kot2<br>mrówka<br><br></div><br><span style="font-weight: bold;">E. Metoda replaceFirst &nbsp;usuwa z napisu pierwsze wystąpienie podnapisu pasującego do wzorca</span><br><pre>import java.io.*;
+import java.util.*;
+import java.util.regex.*;
+
+public class Sample5 {
+
+  public static void main(String[] args) throws Exception {
+    
+    // Usuniemy z tekstu z pliku wszystkie komentarze jednowierszowe 
+    // (zaczynające się od dwóch ukosników - składnia jak w Javie)
+    // wynik zapiszemy do innego pliku
+    
+    Scanner in = new Scanner(new File("test1.txt"));    // skaner dla pliku wejściowego
+    BufferedWriter out = new BufferedWriter(
+                          new FileWriter("test2.txt")); // plik wyjściowy
+
+    // Wzorzec komentarzy:
+    // 0 lub więcej białych znaków, potem dwa ukosniki po których występują bądź nie inne znaki
+    String regex = "\\s*//.*";
+    Pattern pattern = Pattern.compile(regex);
+    Matcher matcher = pattern.matcher(""); 
+    
+    try {
+      while (in.hasNextLine()) {
+        String line = in.nextLine();
+        matcher.reset(line);
+        String nline = matcher.replaceFirst("");  // komentarz zastępujemy pustym napisem
+        if (!nline.equals("")) {                  // wynikowy wiersz zapiszemy, jeśli nie jest pusty
+          out.write(nline);
+          out.newLine();
+        }
+      }
+    } finally {
+      in.close();
+      out.close();
+    }
+  }
+
+}</pre>wynik:<br><div class="listing100"><span style="text-decoration: underline;">Przykładowy plik wejściowy</span><br>tekst<br>// to jest komentarz<br>a tu jest tekst // i komentarz // cos tam<br>&nbsp; // kom1<br>&nbsp; // kom2<br>idzie dalej tekst <br><br><span style="text-decoration: underline;">Wygenerowany plik wyjściowy</span><br>tekst<br>a tu jest tekst<br>idzie dalej tekst<br></div><br><span style="font-weight: bold;">F.
+W tekście zastępującym dopasowanie w metodach replaceFirst i replaceAll
+możemy odwolywać się do zawartości grup wyrażenia regularnego.</span><br><pre>import java.util.regex.*;
+
+public class Sample6 {
+
+  public static void main(String[] args) throws Exception {
+    
+    // Zastąpimy w tekście wszystkie napisy:
+    // (liczbaCałkowita1:liczbaCałkowita2)
+    // na napisy:
+    // [liczbaCałkowita2:liczbaCałkowita1]
+    // czyli zmienimy nawiasy na kwadratowe i przestawimy miejscami liczby
+   
+    // Wzorzec:
+    // nawias,liczba,dwukropek,liczba, nawias - uwaga nawias jest znakiem specjalnym - uzyjemy ukośnika
+    // zastosujemy dwie grupy: dla liczby1 i liczby2 
+    String regex = "\\(<span style="color: rgb(0, 153, 0); font-weight: bold;">(\\d)</span>:<span style="color: rgb(255, 0, 0); font-weight: bold;">(\\d)</span>\\)";
+    Pattern pattern = Pattern.compile(regex);
+    
+    String txt = "tekst 1 (ale) (2) (1:2) wołanie f() (3:4) (8:9)(10:11)";  
+    Matcher matcher = pattern.matcher(txt);
+    
+    // W wywołaniu metody replaceAll (i replaceFirst) podając tekst zastępujący
+    // możemy  odwoływać się do zawartości grup wzorca.
+    // Wtedy tekst zastępujący będzie zawierał zawartość grupy z dopasowania wyrażenia.
+    // W tekście zastępującyn stosujemy znak $ z następującym po nim numerem grupy 
+    // (a więc znak $ jest w tym kontekście zarezerwowany!)
+    // W naszym przykładzie mamy dwie grupy: pierwszą liczbę i drugą liczbę
+    // oznaczamy je $1 i $2
+    
+    // zamiana nawiasów i przestawienie liczb
+    String newTxt = matcher.replaceAll("[$2:$1]");
+    
+    System.out.println("Tekst przed zamianą:");
+    System.out.println(txt);
+    System.out.println("Tekst po zamianie:");
+    System.out.println(newTxt);
+  }
+
+}</pre><br><hr style="width: 100%; height: 2px;"><br>
+<a name="NapLicz.6"></a><h2>6.  Uproszczenia stosowania wyrażeń regularnych w klasach String i Scanner</h2>
+<a name="ind.NapLicz.30"></a>
+
+Jako pewne uproszczenie, do zastosowań ad hoc, znajdziemy w klasie String
+metody, które odwzorowują niektóre z omówionych metod klas Matcher i Pattern.<br>
+Są one następujące.<br>
+  <br>
+  <table border="1" cellpadding="3" cellspacing="0" width="100%">
+<tbody><tr class="TableRowColor" bgcolor="white"><td align="right" valign="top" width="1%">&nbsp;boolean</td><td>matches(String&nbsp;regex)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Czy <i><b>ten</b></i> napis pasuje do wzorca regex?</td></tr><tr class="TableRowColor" bgcolor="white"><td align="right" valign="top" width="1%">&nbsp;String</td><td>replaceAll(String&nbsp;regex,
+           String&nbsp;replacement)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Zastępuje każdy pasujący do regex podłańcuch <i><b>tego</b></i> napisu podanym napisem replacement. Uwaga: znaki $ i \ mają specjalne znaczenie (zob. przykład F z poprzedniego punktu).</td></tr><tr class="TableRowColor" bgcolor="white"><td align="right" valign="top" width="1%">&nbsp;String</td><td>replaceFirst(String&nbsp;regex,
+             String&nbsp;replacement)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Zastępuje pierwszy pasujący do regex podłańcuch <i><b>tego</b></i> napisu podanym napisem replacement. Uwaga: j.w.</td></tr><tr class="TableRowColor" bgcolor="white"><td align="right" valign="top" width="1%">&nbsp;String[]</td><td>split(String&nbsp;regex)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Rozklada ten
+napis wokół separatorów, które są podłancuchami pasującymi do wzorca</td></tr><tr class="TableRowColor" bgcolor="white"><td align="right" valign="top" width="1%">&nbsp;String[]</td><td>split(String&nbsp;regex,
+      int&nbsp;limit)<br>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; j.w., ale nie więcej niż limit-1 razy<br>
+        <br>
+</td></tr></tbody>
+  </table>
+  <br>
+Metody te są ścisłymi odpowiednikami odpowiednich metod klas Matcher i Pattern.
+Faktycznie, "wewnętrznie" wykorzystują one właśnie te klasy i ich metody.
+Np. jeśli txt jest typu String, to<br>
+txt.matches("[0-9]+");<br>
+jest tożsame z :<br>
+Pattern.compile("[0-9]+").matcher().matches();<br>
+  <br>
+Oznacza to, że tych "skróconych" metod klasy String powinniśmy używać wyłącznie
+wtedy, gdy dane wyrażenie regularne i związany z nim matcher używane są jednokrotnie.
+Przy wielokrotnym użyciu nalezy najpierw wyrażenie skompilować (raz), po
+czym dopiero wielokrotnie użyć, co oczywiście już wymaga wykorzystania klas
+Pattern i Matcher.<br><br><a name="ind.NapLicz.31"></a>Klasa Scanner mocno korzysta z wyrażeń regularnych.<br><ul><li>Po
+pierwsze, zestaw separatorów, na których skaner rozkłada teksty metodą
+next() jest wyrażeniem regularnym. Domyślnie jest to wyrażenie,
+określające białe znaki (spacja, tabulacja itp.), ale możemy go zmienić
+używając metody&nbsp;<span style="font-weight: bold;">useDelimiter(String regex)</span> lub <span style="font-weight: bold;">useDelimiter(Pattern p)</span>. Metoda reset() przywraca domyślny wzorzec separatorów. Co więcej,&nbsp; separatory możemy zmieniać w trakcie skanowania,</li><li>Po drugie, dodatkowe metody: <span style="font-weight: bold;">next(String regex)</span> i <span style="font-weight: bold;">next(Pattern p)</span>&nbsp;zwracają kolejny symbol&nbsp;ograniczony&nbsp; separatorami <span style="font-weight: bold;">oraz</span>&nbsp;pasujący
+do wzorca podanego w wyrażeniu regularnym i ustawiają pozycję skanera
+zaraz za nim. W przypadku jeśli kolejny symbol nie pasuje do wzorca,
+zgłaszany jest wyjątek NoSuchElementException. Odpowiednie metody
+hasNext(wyrażenie_regularne) pozwalają stwierdzić, czy&nbsp;symbol jest
+dostępny. Niejako odwrotnością&nbsp; metod next(...) są metody <span style="font-weight: bold;">skip(...)</span>,
+które pomijają separatory oraz kolejny symbol pasujący do wzorca i
+ustawiają pozycję skanera zaraz za nim. Przy braku dopasowania pozycja
+się nie zmienia i zgłaszany jest wyjątek NoSuchElementException.</li><li>Po trzecie, metody <span style="font-weight: bold;">findInLine(wyrażenie_regularne)</span> i <span style="font-weight: bold;">findWithinHorizon(wyrażenie_regularne, n</span>)
+wyszukują w tekście i zwracają napis pasujący do wzorca (ignorując
+separatory), jednocześnie przesuwając pozycję skanera za ten napis.
+Jeśli nie&nbsp;ma pasującego napisu zwracana jest wartość null (nie ma wyjątku). W
+przypadku metody findInLine wyszukiwanie ograniczone jest końcem
+wiersza, metoda findInHorizon przeszukuje n kolejnych znaków (jeśli n
+jest 0 - ograniczeniem jest długość tekstu).</li><li>Po
+czwarte, skaner łączy możliwość użycia wyrażeń regularnych z łatwym
+pobieraniem liczb (np. metoda nextInt). Należy jednak pamiętać, że przy
+pobieraniu liczb rzeczywistych (z separatorem miejsc dziesiętnych)
+skaner przyjmuje format ich zapisu (m.in. to czy separatorem miejsc
+dziesiętnych jest kropka czy przecinek) zgodnie z domyślną lokalizacją
+(aktualnymi ustawieniami regionalnymi). Używaną przez skaner
+lokalizację można zmienić za pomocą metody skanera <span style="font-weight: bold;">useLocale</span>(..).</li></ul><br><div class="notec">Użycie
+wyrażeń regularnych w klasie Skaner jest - podobnie jak w klasie String
+- oparte na odwołaniach do klas Pattern i Matcher. Ale - inaczej niż w
+String - to wykorzystanie jest efektywne, ponieważ stosowane wzorce są
+kompilowane jednokrotnie i przechowywane w mapach.</div><br>
+Przykłady.<br><br><span style="font-weight: bold;">A. Aby uzyskać taki
+sam efekt rozbioru jak w przypadku StringTokenizera należy zastosować
+wyrażenie regularne opisujące wystąpienie jeden lub więcej razy
+dowolnego znaku z podanego zbioru np. [\\s\\p{Punct}]+ - jeden lub
+więcej białych znaków lub znaków interpunkcji.</span><br style="font-weight: bold;"><br><pre>import java.util.*;
+import static java.lang.System.out;
+
+public class Skaner1 {
+
+  // Metoda pomocnicza do okalania napisów apostrofami 
+  public static String quote(String s) {  return "'" + s + "'" + " "; }
+
+  public static void main(String[] args) {
+    // Zadanie: wyróżnić wszystkie napisy rozdzielone spacjami lub znakiem / 
+    String txt = "1/2 /3/ 4";
+        
+    // Separator?
+    // intuicyjnie jedno z: spacja lub znak /
+    String delim = "[ /]";
+    
+    // Przy tworzeniu skanera od razu można ustalić separator
+    Scanner scan = new Scanner(txt).useDelimiter(delim);
+    
+    out.println("Tekst : " + quote(txt) + " Separator: " + quote(delim));
+    
+    // Ale wynik - podobnie jak w split() inny od oczekiwań
+    // ze względu na sposób działania machiny wyrażeń regularnych
+    
+    // uzyskamy 5 symboli zamiast 4: '1' '2' '' '3' '' '4'
+    while (scan.hasNext()) out.print( quote(scan.next()) + " ");
+    
+    // Aby uzyskać taki sam wynik jak w StringTokenizerze
+    // nalezy zastosować wyrażenie regularne: 1 lub więcej spacji lub znaków /
+    delim = "[ /]+";
+    // Uwaga: do nowego skanowania zawsze trzeba tworzyć nowys skaner (nawet jeśli tekst jest ten sam)
+    
+    scan = new Scanner(txt).useDelimiter(delim);  
+    
+    out.println("\nTekst : " + quote(txt) + " Separator: " + quote(delim));
+    
+    // uzyskamy 4 symbole : '1' '2', '3' '' '4'
+    while (scan.hasNext()) out.print( quote(scan.next()) + " ");
+
+  }
+
+}
+</pre>Wynik:<br><div class="listing100">Tekst : '1/2 /3/ 4'&nbsp; Separator: '[ /]' <br>'1'&nbsp; '2'&nbsp; ''&nbsp; '3'&nbsp; ''&nbsp; '4'&nbsp; <br>Tekst : '1/2 /3/ 4'&nbsp; Separator: '[ /]+' <br>'1'&nbsp; '2'&nbsp; '3'&nbsp; '4'&nbsp; </div><br><span style="font-weight: bold;">B. Separatorem może być dowolne wyrażenie regularne, np. jakieś fragmenty tekstów mogą być traktowane jako separatory.</span><br style="font-weight: bold;"><pre>import java.util.*;
+
+public class Skaner2 {
+
+  public static void main(String[] args) {
+    
+    // Zadanie: z napisu (np. jakiegoś dokumentu)
+    // wyróżnić nazwiska, imiona i daty urodzenia
+    // wstawione w odpowiednio opisane pola dokumentu
+    
+    String txt = "LNAME: Kowalski FNAME: Jan BORN: 1980-12-01\n" +
+                 "LNAME:  Malinowski FNAME: Stefan BORN: 1950-01-15\n";
+    
+    // Separator:
+    // dowolna z nazw pól LNAME: albo FNAME: albo BORN:
+    String delim = "(LNAME:)|(FNAME:)|(BORN:)";
+    
+    Scanner scan = new Scanner(txt).useDelimiter(delim);
+    while(scan.hasNext()) {
+      String s = scan.next();
+      // Ponieważ wyłuskane symbole mogą na końcach zawierać białe znaki
+      // usuniemy je za pomocą metody trim() z klasy String
+      s = s.trim();
+      System.out.println( "'" + s + "'");
+    }
+  }
+
+}
+</pre><br>Wynik:<br><div class="listing100">'Kowalski'<br>'Jan'<br>'1980-12-01'<br>'Malinowski'<br>'Stefan'<br>'1950-01-15' </div><br><span style="font-weight: bold;">C. Skaner łączy siłę wyrażeń regularnych z łatwym przekształcaniem napisów w liczby.</span><br><br><pre>import java.util.*;
+
+public class Skaner3 {
+
+  public static void main(String[] args) {
+    
+    // Zadanie: zsumować wszystkie liczby całkowite występujące w tekście
+    
+    String txt = "Wydano najpierw 20, a później 35.\n" +
+                 "W kolejnym dniu zakupiono coś jescze za 1000";
+    
+    // Separator:
+    // 1 lub więcej wystapień nie-cyfry
+    // można tu użyć klasy znaków \D, ale zapiszemy bardziej naocznie: 
+    String delim = "[^0-9]+";
+    
+    Scanner scan = new Scanner(txt).useDelimiter(delim);
+    int sum = 0;
+    while(scan.hasNextInt()) {
+      sum += scan.nextInt();
+      
+    } 
+    System.out.println("Tekst:\n" + txt + "\n\nSuma liczb: " + sum);
+  }
+
+}</pre><br>Wynik:<br><div class="listing100">Tekst:<br>Wydano najpierw 20, a później 35.<br>W kolejnym dniu zakupiono coś jescze za 1000<br><br>Suma liczb: 1055 </div><br><br><span style="font-weight: bold;">D.
+Skaner może działać bezpośrednio na różnych źródłach danych i w
+działaniu tym stosować zaawansowane konstrukcje ze świata wyrażeń
+regularnych (np. pobrać matcher i uzyskać od niego dodatkowe potrzebne
+informacje). </span><br style="font-weight: bold;"><br><pre>import java.util.*;
+
+public class Skaner4 {
+  
+  public static void main(String[] args) throws Exception {
+    // Znane nam już zadanie z wyróżnieniem tytułow rozdziałów 
+    // (napisy w znacznikach &lt;h2&gt; dokumentu html)
+    // w kilku linijkach kodu
+     
+    // Będziemy wczytywać podany plik
+    Scanner fScan = new Scanner(new File("TypyOp.html"));
+
+    // Wyrażenie reg. do wyłuskania tekstu w znacznikach;
+    // - kwantyfikator jest wstrzęmiężliwy (znak ? po +) inaczej bylyby kłopoty
+    // - zastosujemy grupę (nawiasy), aby od razu mieć tekst bez okalających znaczników
+    String h2regex = "(?s)&lt;h2&gt;(.+?)&lt;/h2&gt;";
+    
+    // Metoda findWithinHorizon wyszukuje kolejne wystąpienie 
+    // tekstu pasującego do wzorca (drugi arg 0 = limit wyszukiwania nieograniczony)
+    
+    while(fScan.findWithinHorizon(h2regex, 0) != null) {
+      
+      // Skaner może uzyskać Matcher przez odwolanie match()
+      // Od Matchera pobierzemy zawartość jedynej grupy  
+      String title = fScan.match().group(1);
+      System.out.println(title);
+    }
+    fScan.close();  // zamykamy skaner i plik
+  }
+}
+</pre><br>Wynik:<br><div class="listing100">1. Literały i zmienne<br>2. Pojęcie typu. Typy proste<br>3. Typy i użycie literałów<br>4. Typy zmiennych. Deklaracje<br>5. Operatory i wyrażenia<br>5.1. Przegląd<br>5.2. Operatory przypisania<br>5.3. Zwiększanie i zmniejszanie<br>5.4. Dzielenie całkowite i reszta<br>6. Konwersje arytmetyczne<br>7. Podsumowanie<br>8. Zadania i ćwiczenia </div><br><span style="font-weight: bold;">E.
+Skaner pozwala na ustalenie i zmiany w trakcie skanowania lokalizacji
+(ustawień regionalnych) użwanej przez niego przy interpretacji
+napisów, traktowanych jako liczby rzeczywiste z separatorem miejsc
+dziesiętnych.</span><br style="font-weight: bold;"><br><pre>import java.util.*;
+
+public class Skaner5 {
+
+  public static void main(String[] args) {
+    
+    // Zadanie: pobrać liczby rzeczywiste z tekstu 
+    // uwzględniając format ich zapisu właściwy dla podanych lokalizacji
+    // Tekst ma postać: symbol_języka zapis_liczby_zgodny_z_lokalizacją ...
+    // zsumować wszystkie liczby
+    
+    String txt = "en 1.1 fr 2,2 pl 3,3";   
+    
+    Scanner scan = new Scanner(txt);
+    
+    // Załóżmy, że symbol języka składa się z dwóch dowolnych małych liter
+    // Będziemy go w tekście wyszukiwać za pomocą poniższego wzorca
+    String langSymRx = "[a-z][a-z]";
+
+    double sum = 0;
+    
+    // Metoda findInLine znajduje w wierszu kolejny podnapis 
+    // pasujący do wzorca, jeśli go nie ma - zwraca null
+    
+    String lang = scan.findInLine(langSymRx);
+    while (lang != null) {
+      scan.useLocale( new Locale(lang) );
+      sum += scan.nextDouble();
+      lang = scan.findInLine(langSymRx);
+    }  
+    
+    System.out.println("Tekst:\n" + txt + "\n\nSuma liczb: " + sum);
+  }
+
+}
+
+</pre><br>Wynik:<br><div class="listing100">Tekst:<br>en 1.1 fr 2,2 pl 3,3<br><br>Suma liczb: 6.6 </div><br><br>Na
+koniec opowieści o skanerze przyjrzyjmy się jeszcze tylko jednemu
+przykładowemu programikowi, przetwarzającemu raport o dochodach i
+wydatkach.<br>Plik raportu ma następującą przykładową postać:<br><pre>1.dochody: 100,11 21,21 500,80 
+2.wydatki: 200,10 11,31 756,21
+3.wydatki:  10,61  2,11  25,00
+4.dochody:   2,30 99,12 101,11</pre>przy czym liczba i kolejność wierszy a także ilość liczb w poszczególnych wierszach&nbsp; może być różna.<br>Trzeba
+zbudować klasę, która dostarcza &nbsp;metody sumowania poszczególnych
+kategorii finansowych (wydatków, dochodów). Argumentem metody jest
+kategoria ("wydatki"&nbsp;lub "dochody"), a metoda ma zwracać
+odpowiednio sumę liczb z&nbsp;danej kategorii. Metoda sumowania może
+być wywoływana wielokrotnie, a to wymaga wielokrotnej interpretacji
+treści pliku. W takich sytuacjach najlepiej jest wczytać plik raz
+(jeśli nie jest olbrzymi) i następnie działać już na jego tekście
+umieszczonym w pamięci (jako String).<br><br>Do rozwiązania problemu zastosujemy skaner, bo za jego pomocą: <br><ol><li>łatwo
+odnaleźć początki sekwencji liczb w danych kategoriach (np. kategorie
+dochodów znajdzie nam następujące wyrażenie regularne
+&nbsp;"\d\.dochody:"),</li><li>łatwo pobierać z tekstu liczby,</li><li>nie
+musimy się martwić formatem liczb (wystarczy lokalizacja domyślna;
+zapewne raport jest przygotowany przez księgową, która np. w Polsce
+stosuje przecinek jako separator miejsc dziesiętnych),</li><li>do
+wczytania całego pliku wystarczy praktycznie jedna instrukcja (użycie
+jako separatora dla skanera&nbsp; granicy \Z, oznaczającej&nbsp;koniec
+wejścia")</li></ol>Program przedstawiono na wydruku.<br><pre>import java.io.*;
+import java.util.*;
+
+public class Report {
+  
+  private String report;       
+  
+  public double sum(String what) {
+    Scanner sc = new Scanner(report);
+    String regex = "\\d\\." + what + ":";
+    
+    if (sc.findWithinHorizon(regex, 0) == null)
+      throw new IllegalArgumentException("Brak wymaganej kategorii");
+
+    double sum = 0;
+    do {
+      while (sc.hasNextDouble()) {
+        sum += sc.nextDouble();
+      }
+    } while (sc.findWithinHorizon(regex, 0) != null);
+            
+    return sum;
+  }
+  
+  public Report(String fname) throws FileNotFoundException {
+    Scanner fs = new Scanner( new File(fname) );
+    report = fs.useDelimiter("\\Z").next();
+    fs.close();
+  }
+  
+  public static void main(String[] args) throws FileNotFoundException {
+    Report rep = new Report("RaportKsiegowej.txt");     
+    
+    double wydatki = rep.sum("wydatki"),
+           dochody = rep.sum("dochody");
+    
+    System.out.println("Dochody: " + dochody + "\nWydatki: " + wydatki );
+
+  }
+}</pre>Dla przykładowego pliku otrzymamy w wyniku:<br><div class="listing100">Dochody: 824.65<br>Wydatki: 1005.34</div><br><br>Wyrażenia
+regularne i skaner to mocne narzędzia. Ale też trudne. Ich poprawne
+stosowanie wymaga wiedzy o mechanizmach działania. Tutaj informacja
+taka pojawiła się we fragmentach (warto sięgnąć po dodatkowe
+materiały). Na pewno warto już teraz, niejako od początku nauki,
+stosować wyrażenia regularne, ale &nbsp;dopóki nie osiągniemy w tym
+swego rodzaju mistrzostwa - raczej ostrożnie i z zastosowaniem
+wielokrotnych testów.<br>&nbsp;<br><hr>
+<a name="NapLicz.7"></a><h2>7.  Podsumowanie</h2>
+Zapoznaliśmy się z praktycznymi sposobami przetwarzania tekstów m.in.:<br><ul><li>jak wczytywać teksty z plików i zapisywać je do plików,</li><li>jak stosować niektóre metody klasy String,</li><li>jak przeprowadzać analizę składniową za pomocą klasy StringTokenizer oraz wyrażeń regularnych i klasy Scanner.</li><li>jak wyłuskiwać z tekstów liczby.</li></ul>Jest to wiedza niezbędna w praktycznym programowaniu, a opisane tu sposoby działania i podejścia są stosowane niemal na codzień.<br><br><hr style="width: 100%; height: 2px;">
+
+
+</body></html>
